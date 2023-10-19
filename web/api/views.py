@@ -42,6 +42,10 @@ from reNgine.celery import app
 from django.utils import timezone
 
 
+from django.db.models import Count
+from django.db.models.functions import TruncMonth
+
+
 class AddTarget(APIView):
     def post(self, request):
         req = self.request
