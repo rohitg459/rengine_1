@@ -271,18 +271,21 @@ class Dashboard(APIView):
                 .annotate(month=TruncMonth("subdomain__discovered_date"))
                 .values("month")
                 .annotate(total=Count("subdomain"))
+                .values()
             )
             ip_analysis = (
                 domain_.prefetch_related("subdomain__ip_addresses")
                 .annotate(month=TruncMonth("subdomain__discovered_date"))
                 .values("month")
                 .annotate(total=Count("subdomain__ip_addresses"))
+                .values()
             )
             vul_analysis = (
                 domain_.prefetch_related("vulnerability")
                 .annotate(month=TruncMonth("vulnerability__discovered_date"))
                 .values("month")
                 .annotate(total=Count("vulnerability"))
+                .values()
             )
 
             port_analysis = (
@@ -290,6 +293,7 @@ class Dashboard(APIView):
                 .annotate(month=TruncMonth("subdomain__discovered_date"))
                 .values("month")
                 .annotate(total=Count("subdomain__ip_addresses__ports__number"))
+                .values()
             )
 
             org_domain = list(domain_.values_list("id", flat=True))
@@ -363,6 +367,7 @@ class Dashboard(APIView):
                     )
                 )
                 .annotate(vcount=models.Count("vuln_ports_group"))
+                .values()
             )
             print(vul_ports, "sojal")
 
@@ -384,9 +389,11 @@ class Dashboard(APIView):
             vulnerability_feed = Vulnerability.objects.filter(
                 target_domain__pk__in=org_domain
             ).order_by("-discovered_date")[:20]
-            activity_feed = ScanActivity.objects.filter(
-                scan_of__pk__in=org_scan_id
-            ).order_by("-time")[:20]
+            activity_feed = (
+                ScanActivity.objects.filter(scan_of__pk__in=org_scan_id)
+                .order_by("-time")
+                .values()[:20]
+            )
             total_vul_count = (
                 info_count
                 + low_count
@@ -402,7 +409,8 @@ class Dashboard(APIView):
                 Vulnerability.objects.filter(target_domain__pk__in=org_domain)
                 .values("name", "severity")
                 .annotate(count=Count("name"))
-                .order_by("-count")[:10]
+                .order_by("-count")
+                .values()[:10]
             )
             last_week = timezone.now() - timedelta(days=7)
 
@@ -412,6 +420,7 @@ class Dashboard(APIView):
                 .values("date")
                 .annotate(created_count=Count("id"))
                 .order_by("-date")
+                .values()
             )
             count_subdomains_by_date = (
                 Subdomain.objects.filter(
@@ -421,6 +430,7 @@ class Dashboard(APIView):
                 .values("date")
                 .annotate(count=Count("id"))
                 .order_by("-date")
+                .values()
             )
             count_vulns_by_date = (
                 Vulnerability.objects.filter(
@@ -430,6 +440,7 @@ class Dashboard(APIView):
                 .values("date")
                 .annotate(count=Count("id"))
                 .order_by("-date")
+                .values()
             )
             count_scans_by_date = (
                 ScanHistory.objects.filter(
@@ -439,6 +450,7 @@ class Dashboard(APIView):
                 .values("date")
                 .annotate(count=Count("id"))
                 .order_by("-date")
+                .values()
             )
             count_endpoints_by_date = (
                 EndPoint.objects.filter(
@@ -448,6 +460,7 @@ class Dashboard(APIView):
                 .values("date")
                 .annotate(count=Count("id"))
                 .order_by("-date")
+                .values()
             )
 
             last_7_dates = [
@@ -531,17 +544,20 @@ class Dashboard(APIView):
             context["most_used_port"] = (
                 Port.objects.filter(ports__pk__in=org_ip_id)
                 .annotate(count=Count("ports"))
-                .order_by("-count")[:7]
+                .order_by("-count")
+                .values()[:7]
             )
             context["most_used_ip"] = (
                 org_ip.annotate(count=Count("ip_addresses"))
                 .order_by("-count")
-                .exclude(ip_addresses__isnull=True)[:7]
+                .exclude(ip_addresses__isnull=True)
+                .values()[:7]
             )
             context["most_used_tech"] = (
                 Technology.objects.filter(technologies__pk__in=org_subdomain_id)
                 .annotate(count=Count("technologies"))
-                .order_by("-count")[:7]
+                .order_by("-count")
+                .values()[:7]
             )
 
             context["most_common_cve"] = (
@@ -567,10 +583,11 @@ class Dashboard(APIView):
                 CountryISO.objects.filter(id__in=ctr_iso_id)
                 .annotate(count=Count("ipaddress"))
                 .order_by("-count")
+                .values()
             )
             print(context, "ds")
 
-            return Response(pickle.loads(json.dumps(context, indent=2).encode("utf-8")))
+            return Response(context)
         except Exception as e:
             print(e)
             return Response({"desc": str(e)})
