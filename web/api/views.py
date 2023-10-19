@@ -47,6 +47,8 @@ from django.db.models.functions import TruncMonth
 from django.db.models import CharField, Value
 from django.db.models.functions import Concat
 
+from datetime import datetime, timedelta
+
 
 class AddTarget(APIView):
     def post(self, request):
