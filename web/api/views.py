@@ -252,6 +252,9 @@ class NotificationAPi(APIView):
             return Response({"status": str(e)})
 
 
+import pickle
+
+
 class Dashboard(APIView):
     def post(self, request):
         req = self.request
@@ -565,7 +568,7 @@ class Dashboard(APIView):
                 .order_by("-count")
             )
             print(context, "ds")
-            return Response(serialize_(context))
+            return Response(pickle.dumps(context))
         except Exception as e:
             print(e)
             return Response({"desc": str(e)})
