@@ -262,7 +262,7 @@ class Dashboard(APIView):
 
             # ------------------------------------------
 
-            sd_discovered = (
+            sd_analysis = (
                 domain_.prefetch_related("subdomain")
                 .annotate(month=TruncMonth("subdomain__discovered_date"))
                 .values("month")
