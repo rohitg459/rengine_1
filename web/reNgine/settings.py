@@ -51,7 +51,9 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+
 ROOT_URLCONF = "reNgine.urls"
+
 
 TEMPLATES = [
     {
