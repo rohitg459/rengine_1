@@ -44,6 +44,8 @@ from django.utils import timezone
 
 from django.db.models import Count
 from django.db.models.functions import TruncMonth
+from django.db.models import CharField, Value
+from django.db.models.functions import Concat
 
 
 class AddTarget(APIView):
