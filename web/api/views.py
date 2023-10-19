@@ -14,6 +14,10 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
+from datetime import timedelta
+from django.utils import timezone
+from django.db.models.functions import TruncDay
+from django.db.models.functions import Trunc, Concat
 
 from django.db.models import Q, F
 from django.db.models import CharField, Value, Count
