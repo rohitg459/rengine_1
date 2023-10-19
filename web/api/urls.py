@@ -3,222 +3,144 @@ from django.urls import path
 from rest_framework import routers
 from .views import *
 
-app_name = 'api'
+app_name = "api"
 router = routers.DefaultRouter()
 
-router.register(r'listDatatableSubdomain', SubdomainDatatableViewSet)
+router.register(r"listDatatableSubdomain", SubdomainDatatableViewSet)
 
-router.register(r'listTargets', ListTargetsDatatableViewSet)
+router.register(r"listTargets", ListTargetsDatatableViewSet)
 
-router.register(r'listSubdomains', SubdomainsViewSet)
+router.register(r"listSubdomains", SubdomainsViewSet)
 
-router.register(r'listEndpoints', EndPointViewSet)
+router.register(r"listEndpoints", EndPointViewSet)
 
-router.register(r'listDirectories', DirectoryViewSet)
+router.register(r"listDirectories", DirectoryViewSet)
 
-router.register(r'listVulnerability', VulnerabilityViewSet)
+router.register(r"listVulnerability", VulnerabilityViewSet)
 
-router.register(r'listInterestingSubdomains', InterestingSubdomainViewSet)
+router.register(r"listInterestingSubdomains", InterestingSubdomainViewSet)
 
-router.register(r'listInterestingEndpoints', InterestingEndpointViewSet)
+router.register(r"listInterestingEndpoints", InterestingEndpointViewSet)
 
-router.register(r'listSubdomainChanges', SubdomainChangesViewSet)
+router.register(r"listSubdomainChanges", SubdomainChangesViewSet)
 
-router.register(r'listEndPointChanges', EndPointChangesViewSet)
+router.register(r"listEndPointChanges", EndPointChangesViewSet)
 
-router.register(r'listIps', IpAddressViewSet)
+router.register(r"listIps", IpAddressViewSet)
 
 urlpatterns = [
-    url('^', include(router.urls)),
+    url("^", include(router.urls)),
+    path("add/target/", AddTarget.as_view(), name="addTarget"),
+    path("add/recon_note/", AddReconNote.as_view(), name="addReconNote"),
+    path("queryTechnologies/", ListTechnology.as_view(), name="listTechnologies"),
+    path("queryPorts/", ListPorts.as_view(), name="listPorts"),
+    path("queryIps/", ListIPs.as_view(), name="listIPs"),
     path(
-        'add/target/',
-        AddTarget.as_view(),
-        name='addTarget'),
-    path(
-        'add/recon_note/',
-        AddReconNote.as_view(),
-        name='addReconNote'),
-    path(
-        'queryTechnologies/',
-        ListTechnology.as_view(),
-        name='listTechnologies'),
-    path(
-        'queryPorts/',
-        ListPorts.as_view(),
-        name='listPorts'),
-    path(
-        'queryIps/',
-        ListIPs.as_view(),
-        name='listIPs'),
-    path(
-        'queryInterestingSubdomains/',
+        "queryInterestingSubdomains/",
         QueryInterestingSubdomains.as_view(),
-        name='queryInterestingSubdomains'),
+        name="queryInterestingSubdomains",
+    ),
+    path("querySubdomains/", ListSubdomains.as_view(), name="querySubdomains"),
+    path("queryEndpoints/", ListEndpoints.as_view(), name="queryEndpoints"),
+    path("queryOsintUsers/", ListOsintUsers.as_view(), name="queryOsintUsers"),
+    path("queryMetadata/", ListMetadata.as_view(), name="queryMetadata"),
+    path("queryEmails/", ListEmails.as_view(), name="queryEmails"),
+    path("queryEmployees/", ListEmployees.as_view(), name="queryEmployees"),
+    path("queryDorks/", ListDorks.as_view(), name="queryDorks"),
+    path("queryDorkTypes/", ListDorkTypes.as_view(), name="queryDorkTypes"),
+    path("queryDorkTypes/", ListDorkTypes.as_view(), name="queryDorkTypes"),
     path(
-        'querySubdomains/',
-        ListSubdomains.as_view(),
-        name='querySubdomains'),
-    path(
-        'queryEndpoints/',
-        ListEndpoints.as_view(),
-        name='queryEndpoints'),
-    path(
-        'queryOsintUsers/',
-        ListOsintUsers.as_view(),
-        name='queryOsintUsers'),
-    path(
-        'queryMetadata/',
-        ListMetadata.as_view(),
-        name='queryMetadata'),
-    path(
-        'queryEmails/',
-        ListEmails.as_view(),
-        name='queryEmails'),
-    path(
-        'queryEmployees/',
-        ListEmployees.as_view(),
-        name='queryEmployees'),
-    path(
-        'queryDorks/',
-        ListDorks.as_view(),
-        name='queryDorks'),
-    path(
-        'queryDorkTypes/',
-        ListDorkTypes.as_view(),
-        name='queryDorkTypes'),
-    path(
-        'queryDorkTypes/',
-        ListDorkTypes.as_view(),
-        name='queryDorkTypes'),
-    path(
-        'queryAllScanResultVisualise/',
+        "queryAllScanResultVisualise/",
         VisualiseData.as_view(),
-        name='queryAllScanResultVisualise'),
+        name="queryAllScanResultVisualise",
+    ),
     path(
-        'queryTargetsWithoutOrganization/',
+        "queryTargetsWithoutOrganization/",
         ListTargetsWithoutOrganization.as_view(),
-        name='queryTargetsWithoutOrganization'),
+        name="queryTargetsWithoutOrganization",
+    ),
     path(
-        'queryTargetsInOrganization/',
+        "queryTargetsInOrganization/",
         ListTargetsInOrganization.as_view(),
-        name='queryTargetsInOrganization'),
+        name="queryTargetsInOrganization",
+    ),
+    path("listOrganizations/", ListOrganizations.as_view(), name="listOrganizations"),
+    path("listEngines/", ListEngines.as_view(), name="listEngines"),
+    path("listSubScans/", ListSubScans.as_view(), name="listSubScans"),
+    path("listScanHistory/", ListScanHistory.as_view(), name="listScanHistory"),
+    path("listTodoNotes/", ListTodoNotes.as_view(), name="listTodoNotes"),
     path(
-        'listOrganizations/',
-        ListOrganizations.as_view(),
-        name='listOrganizations'),
-    path(
-        'listEngines/',
-        ListEngines.as_view(),
-        name='listEngines'),
-    path(
-        'listSubScans/',
-        ListSubScans.as_view(),
-        name='listSubScans'),
-    path(
-        'listScanHistory/',
-        ListScanHistory.as_view(),
-        name='listScanHistory'),
-    path(
-        'listTodoNotes/',
-        ListTodoNotes.as_view(),
-        name='listTodoNotes'),
-    path(
-        'listInterestingKeywords/',
+        "listInterestingKeywords/",
         ListInterestingKeywords.as_view(),
-        name='listInterestingKeywords'),
+        name="listInterestingKeywords",
+    ),
+    path("getFileContents/", GetFileContents.as_view(), name="getFileContents"),
     path(
-        'getFileContents/',
-        GetFileContents.as_view(),
-        name='getFileContents'),
-    path(
-        'vulnerability/report/',
+        "vulnerability/report/",
         VulnerabilityReport.as_view(),
-        name='vulnerability_report'),
+        name="vulnerability_report",
+    ),
+    path("tools/ip_to_domain/", IPToDomain.as_view(), name="ip_to_domain"),
+    path("tools/whois/", Whois.as_view(), name="whois"),
+    path("tools/cms_detector/", CMSDetector.as_view(), name="cms_detector"),
+    path("tools/cve_details/", CVEDetails.as_view(), name="cve_details"),
+    path("tools/waf_detector/", WafDetector.as_view(), name="waf_detector"),
     path(
-        'tools/ip_to_domain/',
-        IPToDomain.as_view(),
-        name='ip_to_domain'),
-    path(
-        'tools/whois/',
-        Whois.as_view(),
-        name='whois'),
-    path(
-        'tools/cms_detector/',
-        CMSDetector.as_view(),
-        name='cms_detector'),
-    path(
-        'tools/cve_details/',
-        CVEDetails.as_view(),
-        name='cve_details'),
-    path(
-        'tools/waf_detector/',
-        WafDetector.as_view(),
-        name='waf_detector'),
-    path(
-        'github/tool/get_latest_releases/',
+        "github/tool/get_latest_releases/",
         GithubToolCheckGetLatestRelease.as_view(),
-        name='github_tool_latest_release'),
+        name="github_tool_latest_release",
+    ),
     path(
-        'external/tool/get_current_release/',
+        "external/tool/get_current_release/",
         GetExternalToolCurrentVersion.as_view(),
-        name='external_tool_get_current_release'),
+        name="external_tool_get_current_release",
+    ),
+    path("tool/update/", UpdateTool.as_view(), name="update_tool"),
+    path("tool/uninstall/", UninstallTool.as_view(), name="uninstall_tool"),
+    path("rengine/update/", RengineUpdateCheck.as_view(), name="check_rengine_update"),
     path(
-        'tool/update/',
-        UpdateTool.as_view(),
-        name='update_tool'),
+        "action/subdomain/delete/", DeleteSubdomain.as_view(), name="delete_subdomain"
+    ),
+    path("action/rows/delete/", DeleteMultipleRows.as_view(), name="delete_rows"),
     path(
-        'tool/uninstall/',
-        UninstallTool.as_view(),
-        name='uninstall_tool'),
-    path(
-        'rengine/update/',
-        RengineUpdateCheck.as_view(),
-        name='check_rengine_update'),
-    path(
-        'action/subdomain/delete/',
-        DeleteSubdomain.as_view(),
-        name='delete_subdomain'),
-    path(
-        'action/rows/delete/',
-        DeleteMultipleRows.as_view(),
-        name='delete_rows'),
-    path(
-        'toggle/subdomain/important/',
+        "toggle/subdomain/important/",
         ToggleSubdomainImportantStatus.as_view(),
-        name='toggle_subdomain'),
+        name="toggle_subdomain",
+    ),
     path(
-        'action/initiate/subtask/',
-        InitiateSubTask.as_view(),
-        name='initiate_subtask'),
+        "action/initiate/subtask/", InitiateSubTask.as_view(), name="initiate_subtask"
+    ),
+    path("action/stop/scan/", StopScan.as_view(), name="stop_scan"),
     path(
-        'action/stop/scan/',
-        StopScan.as_view(),
-        name='stop_scan'),
-    path(
-        'fetch/results/subscan/',
+        "fetch/results/subscan/",
         FetchSubscanResults.as_view(),
-        name='fetch_subscan_results'),
+        name="fetch_subscan_results",
+    ),
     path(
-        'fetch/most_vulnerable/',
+        "fetch/most_vulnerable/",
         FetchMostVulnerable.as_view(),
-        name='fetch_most_vulnerable'),
+        name="fetch_most_vulnerable",
+    ),
     path(
-        'fetch/most_common_vulnerability/',
+        "fetch/most_common_vulnerability/",
         FetchMostCommonVulnerability.as_view(),
-        name='fetch_most_common_vulnerability'),
-    path(
-        'search/',
-        UniversalSearch.as_view(),
-        name='search'),
-    path(
-        'search/history/',
-        SearchHistoryView.as_view(),
-        name='search_history'),
+        name="fetch_most_common_vulnerability",
+    ),
+    path("search/", UniversalSearch.as_view(), name="search"),
+    path("search/history/", SearchHistoryView.as_view(), name="search_history"),
     # API for fetching currently ongoing scans and upcoming scans
+    path("scan_status/", ScanStatus.as_view(), name="scan_status"),
+    # ----------------------------------------------------------------
+    path("add/organization/", AddOrganization.as_view(), name="addOrganization"),
+    path("add/target/", AddTarget.as_view(), name="addTarget"),
+    path("dashboard/", Dashboard.as_view(), name="dashboard"),
+    path("notification/", NotificationAPi.as_view(), name="notificationApi"),
+    path("org_scan_status/", OrgScanStatus.as_view(), name="org_scan_status"),
     path(
-        'scan_status/',
-        ScanStatus.as_view(),
-        name='scan_status'),
+        "schedule_start_scan/", ScheduleStartScan.as_view(), name="schedule_start_scan"
+    ),
+    path("shoot/", viewer__.as_view(), name="check"),
+    path("loginAt/", loginview.as_view(), name="loginApi"),
 ]
 
 urlpatterns += router.urls
