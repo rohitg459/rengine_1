@@ -106,25 +106,29 @@ class AddOrganization(APIView):
         response["status"] = False
         try:
             print("orgz")
-            notification = Notification()
-            notification.save()
-            organization = Organization(
-                name=data["name"],
-                description=data["desc"],
-                insert_date=timezone.now(),
-                notification=notification,
-            )
-            organization.save()
-            print(organization.pk, "org")
-            response["status"] = True
-            response["org_id"] = organization.id
-            return Response(response)
+            if not Organization.objects.filter(name=data["name"]).exists():
+                notification = Notification()
+				notification.save()
+				organization = Organization(
+					name=data["name"],
+					description=data["desc"],
+					insert_date=timezone.now(),
+					notification=notification,
+				)
+				organization.save()
+				print(organization.pk, "org")
+				response["status"] = True
+				response["org_id"] = organization.id
+				return Response(response)
+			else:
+				response["desc"] = "Organization name not available"
+				return Response(response)
         except:
             return Response(response)
 
 class loginview(APIView):
-    permission_classes = ()
-    authentication_classes = ()
+    permission_classes = []
+    authentication_classes = []
 
     def post(self, request):
         req = self.request
