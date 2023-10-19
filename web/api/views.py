@@ -253,6 +253,7 @@ class NotificationAPi(APIView):
 
 
 import pickle
+import json
 
 
 class Dashboard(APIView):
@@ -568,7 +569,8 @@ class Dashboard(APIView):
                 .order_by("-count")
             )
             print(context, "ds")
-            return Response(pickle.loads(context))
+
+            return Response(pickle.loads(json.dumps(context, indent=2).encode("utf-8")))
         except Exception as e:
             print(e)
             return Response({"desc": str(e)})
