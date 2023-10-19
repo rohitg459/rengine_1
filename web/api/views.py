@@ -262,7 +262,7 @@ class Dashboard(APIView):
                 .annotate(month=TruncMonth("subdomain__discovered_date"))
                 .values("month")
                 .annotate(total=Count("subdomain"))
-model_to_dict(            )
+            )
             ip_analysis = model_to_dict(
                 domain_.prefetch_related("subdomain__ip_addresses")
                 .annotate(month=TruncMonth("subdomain__discovered_date"))
@@ -523,45 +523,45 @@ model_to_dict(            )
             }
 
             context["total_ips"] = org_ip.count()
-            context["most_used_port"] = (
-                model_to_dict(Port.objects.filter(ports__pk__in=org_ip_id)
+            context["most_used_port"] = model_to_dict(
+                Port.objects.filter(ports__pk__in=org_ip_id)
                 .annotate(count=Count("ports"))
-                .order_by("-count")[:7])
+                .order_by("-count")[:7]
             )
-            context["most_used_ip"] = (
-                model_to_dict(org_ip.annotate(count=Count("ip_addresses"))
+            context["most_used_ip"] = model_to_dict(
+                org_ip.annotate(count=Count("ip_addresses"))
                 .order_by("-count")
-                .exclude(ip_addresses__isnull=True)[:7])
+                .exclude(ip_addresses__isnull=True)[:7]
             )
-            context["most_used_tech"] = (
-                model_to_dict(Technology.objects.filter(technologies__pk__in=org_subdomain_id)
+            context["most_used_tech"] = model_to_dict(
+                Technology.objects.filter(technologies__pk__in=org_subdomain_id)
                 .annotate(count=Count("technologies"))
-                .order_by("-count")[:7])
+                .order_by("-count")[:7]
             )
 
-            context["most_common_cve"] = (
-                model_to_dict(CveId.objects.filter(cve_ids__pk__in=vulnerabilities_id)
+            context["most_common_cve"] = model_to_dict(
+                CveId.objects.filter(cve_ids__pk__in=vulnerabilities_id)
                 .annotate(nused=Count("cve_ids"))
                 .order_by("-nused")
-                .values("name", "nused")[:7])
+                .values("name", "nused")[:7]
             )
-            context["most_common_cwe"] = (
-                model_to_dict(CweId.objects.filter(cwe_ids__pk__in=vulnerabilities_id)
+            context["most_common_cwe"] = model_to_dict(
+                CweId.objects.filter(cwe_ids__pk__in=vulnerabilities_id)
                 .annotate(nused=Count("cwe_ids"))
                 .order_by("-nused")
-                .values("name", "nused")[:7])
+                .values("name", "nused")[:7]
             )
-            context["most_common_tags"] = (
-                model_to_dict(VulnerabilityTags.objects.filter(vuln_tags__pk__in=vulnerabilities_id)
+            context["most_common_tags"] = model_to_dict(
+                VulnerabilityTags.objects.filter(vuln_tags__pk__in=vulnerabilities_id)
                 .annotate(nused=Count("vuln_tags"))
                 .order_by("-nused")
-                .values("name", "nused")[:7])
+                .values("name", "nused")[:7]
             )
 
-            context["asset_countries"] = (
-                model_to_dict(CountryISO.objects.filter(id__in=ctr_iso_id)
+            context["asset_countries"] = model_to_dict(
+                CountryISO.objects.filter(id__in=ctr_iso_id)
                 .annotate(count=Count("ipaddress"))
-                .order_by("-count"))
+                .order_by("-count")
             )
             print(context, "ds")
             return Response(context)
