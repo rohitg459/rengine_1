@@ -568,7 +568,7 @@ class Dashboard(APIView):
                 .order_by("-count")
             )
             print(context, "ds")
-            return Response(pickle.dumps(context))
+            return Response(pickle.loads(context))
         except Exception as e:
             print(e)
             return Response({"desc": str(e)})
