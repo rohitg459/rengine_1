@@ -143,7 +143,7 @@ from django.core import serializers
 
 
 def serialize_(qs):
-    return serializers.serialize("python", qs)
+    return serializers.serialize("json", qs)
 
 
 @login_not_required
