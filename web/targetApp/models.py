@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.apps import apps
 from django.contrib.postgres.fields import ArrayField
+from scanEngine.models import Notification
 
 
 class AssociatedDomain(models.Model):
@@ -393,7 +394,7 @@ class Organization(models.Model):
     insert_date = models.DateTimeField()
     domains = models.ManyToManyField("Domain", related_name="domains")
     notification = models.ForeignKey(
-        "Notification",
+        Notification,
         on_delete=models.CASCADE,
         null=True,
         blank=True,
