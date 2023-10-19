@@ -125,6 +125,7 @@ class AddOrganization(APIView):
 
 
 from login_required import login_not_required
+from django.contrib.auth import authenticate, login
 
 
 @login_not_required
