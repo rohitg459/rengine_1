@@ -139,6 +139,11 @@ class AddOrganization(APIView):
 from login_required import login_not_required
 from django.contrib.auth import authenticate, login
 from django.forms.models import model_to_dict
+from django.core import serializers
+
+
+def serialize_(qs):
+    return serializers.serialize("python", qs)
 
 
 @login_not_required
@@ -257,26 +262,26 @@ class Dashboard(APIView):
 
             # ------------------------------------------
 
-            sd_discovered = model_to_dict(
+            sd_discovered = serialize_(
                 domain_.prefetch_related("subdomain")
                 .annotate(month=TruncMonth("subdomain__discovered_date"))
                 .values("month")
                 .annotate(total=Count("subdomain"))
             )
-            ip_analysis = model_to_dict(
+            ip_analysis = serialize_(
                 domain_.prefetch_related("subdomain__ip_addresses")
                 .annotate(month=TruncMonth("subdomain__discovered_date"))
                 .values("month")
                 .annotate(total=Count("subdomain__ip_addresses"))
             )
-            vul_analysis = model_to_dict(
+            vul_analysis = serialize_(
                 domain_.prefetch_related("vulnerability")
                 .annotate(month=TruncMonth("vulnerability__discovered_date"))
                 .values("month")
                 .annotate(total=Count("vulnerability"))
             )
 
-            port_analysis = model_to_dict(
+            port_analysis = serialize_(
                 domain_.prefetch_related("subdomain__ip_addresses__ports")
                 .annotate(month=TruncMonth("subdomain__discovered_date"))
                 .values("month")
@@ -343,7 +348,7 @@ class Dashboard(APIView):
                 target_domain__pk__in=org_domain
             )
 
-            vul_ports = model_to_dict(
+            vul_ports = serialize_(
                 vulnerabilities.prefetch_related("subdomain__ip_addresses__ports")
                 .values("subdomain__ip_addresses__ports__number")
                 .annotate(
@@ -372,12 +377,12 @@ class Dashboard(APIView):
             critical_count = vulnerabilities.filter(severity=4).count()
             unknown_count = vulnerabilities.filter(severity=-1).count()
 
-            vulnerability_feed = model_to_dict(
+            vulnerability_feed = serialize_(
                 Vulnerability.objects.filter(target_domain__pk__in=org_domain).order_by(
                     "-discovered_date"
                 )[:20]
             )
-            activity_feed = model_to_dict(
+            activity_feed = serialize_(
                 ScanActivity.objects.filter(scan_of__pk__in=org_scan_id).order_by(
                     "-time"
                 )[:20]
@@ -393,7 +398,7 @@ class Dashboard(APIView):
             total_vul_ignore_info_count = (
                 low_count + medium_count + high_count + critical_count
             )
-            most_common_vulnerability = model_to_dict(
+            most_common_vulnerability = serialize_(
                 Vulnerability.objects.filter(target_domain__pk__in=org_domain)
                 .values("name", "severity")
                 .annotate(count=Count("name"))
@@ -523,42 +528,42 @@ class Dashboard(APIView):
             }
 
             context["total_ips"] = org_ip.count()
-            context["most_used_port"] = model_to_dict(
+            context["most_used_port"] = serialize_(
                 Port.objects.filter(ports__pk__in=org_ip_id)
                 .annotate(count=Count("ports"))
                 .order_by("-count")[:7]
             )
-            context["most_used_ip"] = model_to_dict(
+            context["most_used_ip"] = serialize_(
                 org_ip.annotate(count=Count("ip_addresses"))
                 .order_by("-count")
                 .exclude(ip_addresses__isnull=True)[:7]
             )
-            context["most_used_tech"] = model_to_dict(
+            context["most_used_tech"] = serialize_(
                 Technology.objects.filter(technologies__pk__in=org_subdomain_id)
                 .annotate(count=Count("technologies"))
                 .order_by("-count")[:7]
             )
 
-            context["most_common_cve"] = model_to_dict(
+            context["most_common_cve"] = serialize_(
                 CveId.objects.filter(cve_ids__pk__in=vulnerabilities_id)
                 .annotate(nused=Count("cve_ids"))
                 .order_by("-nused")
                 .values("name", "nused")[:7]
             )
-            context["most_common_cwe"] = model_to_dict(
+            context["most_common_cwe"] = serialize_(
                 CweId.objects.filter(cwe_ids__pk__in=vulnerabilities_id)
                 .annotate(nused=Count("cwe_ids"))
                 .order_by("-nused")
                 .values("name", "nused")[:7]
             )
-            context["most_common_tags"] = model_to_dict(
+            context["most_common_tags"] = serialize_(
                 VulnerabilityTags.objects.filter(vuln_tags__pk__in=vulnerabilities_id)
                 .annotate(nused=Count("vuln_tags"))
                 .order_by("-nused")
                 .values("name", "nused")[:7]
             )
 
-            context["asset_countries"] = model_to_dict(
+            context["asset_countries"] = serialize_(
                 CountryISO.objects.filter(id__in=ctr_iso_id)
                 .annotate(count=Count("ipaddress"))
                 .order_by("-count")
