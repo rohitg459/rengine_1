@@ -559,7 +559,7 @@ class Dashboard(APIView):
                 .annotate(count=Count("ipaddress"))
                 .order_by("-count")
             )
-            print(response, "ds")
+            print(context, "ds")
             return Response(context)
         except Exception as e:
             print(e)
