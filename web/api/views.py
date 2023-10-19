@@ -122,6 +122,30 @@ class AddOrganization(APIView):
         except:
             return Response(response)
 
+class loginview(APIView):
+    permission_classes = ()
+    authentication_classes = ()
+
+    def post(self, request):
+        req = self.request
+        data = req.data
+        print(data, "data")
+        context = {}
+        user = authenticate(
+            request,
+            username=data["username"],
+            password=data["password"],
+        )
+        print(user)
+        context["user"] = model_to_dict(user)
+        if user:
+            loggedIn = login(request, user)
+
+            context["loggedIn"] = loggedIn
+
+            return Response(context)
+        return Response(context)
+
 
 class NotificationAPi(APIView):
     def get(self, request):
