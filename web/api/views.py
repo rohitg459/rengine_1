@@ -124,6 +124,10 @@ class AddOrganization(APIView):
             return Response(response)
 
 
+from login_required import login_not_required
+
+
+@login_not_required
 class loginview(APIView):
     permission_classes = []
     authentication_classes = []
