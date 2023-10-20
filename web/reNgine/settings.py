@@ -16,6 +16,7 @@ SECRET_KEY = first_run(SECRET_FILE, BASE_DIR)
 DEBUG = int(os.environ.get("DEBUG", default=0))
 
 ALLOWED_HOSTS = ["*"]
+CORS_ALLOWED_ORIGINS = "*"
 
 # Application definition
 
