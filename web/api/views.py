@@ -137,7 +137,7 @@ class AddOrganization(APIView):
 
 
 from login_required import login_not_required
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.forms.models import model_to_dict
 from django.core import serializers
 
