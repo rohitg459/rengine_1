@@ -172,6 +172,12 @@ class loginview(APIView):
         return Response(context)
 
 
+class logoutview(APIView):
+    def get(self, request):
+        logout(request)
+        return Response({"status": True})
+
+
 class NotificationAPi(APIView):
     def get(self, request):
         org_id = request.query_params.get("org_id")

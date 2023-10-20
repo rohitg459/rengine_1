@@ -140,6 +140,7 @@ urlpatterns = [
         "schedule_start_scan/", ScheduleStartScan.as_view(), name="schedule_start_scan"
     ),
     path("loginAt/", loginview.as_view(), name="loginApi"),
+    path("logoutAt/", logoutview.as_view(), name="logoutApi"),
 ]
 
 urlpatterns += router.urls
