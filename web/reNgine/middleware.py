@@ -15,9 +15,9 @@ class PrintRequestMiddleware:
             if request.COOKIES:
                 print(request.COOKIES, "COOKIES")
                 print("-------------------------------------------")
-                # if request.META:
-                #     print(request.META, "META")
-                #     print("-------------------------------------------")
+                if request.META:
+                    print(request.META, "META")
+                    print("-------------------------------------------")
                 # if request.body:
                 # print(request.body, "body")
                 print("-------------------------------------------")
