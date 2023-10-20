@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     "drf_yasg",
     "corsheaders",
 ]
+CORS_ALLOW_HEADERS = ["Cookie", "X-CSRFToken"]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

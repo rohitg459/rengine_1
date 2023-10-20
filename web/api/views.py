@@ -140,6 +140,7 @@ from login_required import login_not_required
 from django.contrib.auth import authenticate, login, logout
 from django.forms.models import model_to_dict
 from django.core import serializers
+from django.middleware.csrf import get_token
 
 
 def serialize_(qs):
@@ -164,9 +165,11 @@ class loginview(APIView):
         print(user)
         context["user"] = model_to_dict(user)
         if user:
+            csrf_token = get_token(request)
             loggedIn = login(request, user)
 
             context["loggedIn"] = loggedIn
+            context["csrf_token"] = csrf_token
 
             return Response(context)
         return Response(context)
