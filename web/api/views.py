@@ -1305,49 +1305,51 @@ class AddTarget(APIView):
         target_name = data.get("domain_name")
         h1_team_handle = data.get("h1_team_handle")
         description = data.get("description")
+        try:
+            if not target_name:
+                return Response({"status": False, "message": "domain_name missing!"})
 
-        if not target_name:
-            return Response({"status": False, "message": "domain_name missing!"})
+            # validate if target_name is a valid domain_name
+            if not validators.domain(target_name):
+                return Response({"status": False, "message": "Invalid Domain or IP"})
 
-        # validate if target_name is a valid domain_name
-        if not validators.domain(target_name):
-            return Response({"status": False, "message": "Invalid Domain or IP"})
+            org_instance = Organization.objects.get(id=data["org_id"])
+            print(org_instance, "oiiins")
+            if Domain.objects.filter(name=target_name).exists():
+                domain = Domain.objects.get(name=target_name)
+                if ip_address:
+                    domain.ip_address_cidr = ip_address
+                domain.save()
+                org_instance.domains.add(domain)
+                return Response(
+                    {
+                        "status": False,
+                        "message": "Target already exists!",
+                        "domain_id": domain.id,
+                    }
+                )
 
-        org_instance = Organization.objects.get(id=data["org_id"])
-        print(org_instance, "oiiins")
-        if Domain.objects.filter(name=target_name).exists():
-            domain = Domain.objects.get(name=target_name)
+            domain = Domain()
+            domain.description = description
+            domain.name = target_name
+            domain.insert_date = timezone.now()
+            domain.h1_team_handle = h1_team_handle
+
             if ip_address:
                 domain.ip_address_cidr = ip_address
             domain.save()
             org_instance.domains.add(domain)
+
             return Response(
                 {
-                    "status": False,
-                    "message": "Target already exists!",
+                    "status": True,
+                    "message": "Domain successfully added as target!",
+                    "domain_name": target_name,
                     "domain_id": domain.id,
                 }
             )
-
-        domain = Domain()
-        domain.description = description
-        domain.name = target_name
-        domain.insert_date = timezone.now()
-        domain.h1_team_handle = h1_team_handle
-
-        if ip_address:
-            domain.ip_address_cidr = ip_address
-        domain.save()
-        org_instance.domains.add(domain)
-
-        return Response(
-            {
-                "status": True,
-                "message": "Domain successfully added as target!",
-                "domain_name": target_name,
-                "domain_id": domain.id,
-            }
-        )
+        except Exception as e:
+            return Response({"status": False, "desc": str(e)})
 
 
 class FetchSubscanResults(APIView):
