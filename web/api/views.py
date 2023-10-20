@@ -1305,6 +1305,8 @@ class AddTarget(APIView):
         target_name = data.get("domain_name")
         h1_team_handle = data.get("h1_team_handle")
         description = data.get("description")
+        ip_address = data.get("ip_address")
+
         try:
             if not target_name:
                 return Response({"status": False, "message": "domain_name missing!"})
