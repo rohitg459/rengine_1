@@ -924,6 +924,18 @@ class ListTargetsDatatableViewSet(viewsets.ModelViewSet):
 
     def filter_queryset(self, qs):
         qs = self.queryset.filter()
+        print("filtered", int(self.request.GET.get("orgId", 0)))
+        orgId = int(self.request.GET.get("orgId", 0))
+        if orgId:
+            org_domain = list(
+                Organization.objects.get(id=orgId)
+                .get_domains()
+                .values_list("id", flat=True)
+            )
+            print(org_domain, "1")
+            qs = qs.filter(id__in=org_domain)
+            print("2", qs)
+
         search_value = self.request.GET.get("search[value]", None)
         _order_col = self.request.GET.get("order[0][column]", None)
         _order_direction = self.request.GET.get("order[0][dir]", None)
