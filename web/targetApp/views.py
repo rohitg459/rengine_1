@@ -257,7 +257,7 @@ def delete_targets_api(request):
             for id in list_of_domains:
                 Domain.objects.filter(id=id).delete()
                 count += 1
-            context["result"] = "{count} domains deleted"
+            context["result"] = f"{count} domains deleted"
             context["status"] = True
         except Exception as e:
             context["desc"] = str(e)
