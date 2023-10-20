@@ -250,7 +250,7 @@ def delete_targets_api(request):
         try:
             count = 0
             for id in list_of_domains:
-                Domain.objects.filter(id=value).delete()
+                Domain.objects.filter(id=id).delete()
                 count += 1
             context["result"] = "{count} domains deleted"
             context["status"] = True
