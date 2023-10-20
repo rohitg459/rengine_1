@@ -921,6 +921,7 @@ class QueryInterestingSubdomains(APIView):
         return Response(InterestingSubdomainSerializer(queryset, many=True).data)
 
 
+@login_not_required
 class ListTargetsDatatableViewSet(viewsets.ModelViewSet):
     queryset = Domain.objects.all()
     serializer_class = DomainSerializer
