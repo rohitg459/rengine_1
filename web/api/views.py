@@ -1295,21 +1295,32 @@ class AddTarget(APIView):
         if not validators.domain(target_name):
             return Response({"status": False, "message": "Invalid Domain or IP"})
 
+        org_instance = Organization.objects.get(id=data["org_id"])
+        print(org_instance, "oiiins")
         if Domain.objects.filter(name=target_name).exists():
+            domain = Domain.objects.get(name=target_name)
+            if ip_address:
+                domain.ip_address_cidr = ip_address
+            domain.save()
+            org_instance.domains.add(domain)
             return Response(
                 {
                     "status": False,
                     "message": "Target already exists!",
-                    "domain_id": Domain.objects.get(name=target_name).id,
+                    "domain_id": domain.id,
                 }
             )
 
         domain = Domain()
+        domain.description = description
         domain.name = target_name
         domain.insert_date = timezone.now()
         domain.h1_team_handle = h1_team_handle
-        domain.description = description
+
+        if ip_address:
+            domain.ip_address_cidr = ip_address
         domain.save()
+        org_instance.domains.add(domain)
 
         return Response(
             {
