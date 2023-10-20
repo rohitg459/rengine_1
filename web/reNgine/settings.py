@@ -15,8 +15,7 @@ SECRET_KEY = first_run(SECRET_FILE, BASE_DIR)
 
 DEBUG = int(os.environ.get("DEBUG", default=0))
 
-ALLOWED_HOSTS = ["*"]
-CORS_ALLOWED_ORIGINS = "*"
+# CORS_ALLOWED_ORIGINS = "*"
 
 # Application definition
 
@@ -87,6 +86,7 @@ CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOWED_ORIGIN_REGEXES = [
     r"^*$",
 ]
+ALLOWED_HOSTS = ["*"]
 CORS_ALLOW_HEADERS = [
     "accept",
     "accept-encoding",
