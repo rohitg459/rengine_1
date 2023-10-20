@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     "django_celery_beat",
     "mathfilters",
     "drf_yasg",
+    "corsheaders",
 ]
 
 MIDDLEWARE = [
@@ -49,6 +50,7 @@ MIDDLEWARE = [
     "login_required.middleware.LoginRequiredMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "reNgine.middleware.PrintRequestMiddleware",
 ]
 
@@ -74,6 +76,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "reNgine.wsgi.application"
 
+CORS_ORIGIN_ALLOW_ALL = True
 
 # REST Framework
 
