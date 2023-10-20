@@ -77,7 +77,8 @@ TEMPLATES = [
 WSGI_APPLICATION = "reNgine.wsgi.application"
 
 CORS_ORIGIN_ALLOW_ALL = True
-CORS_ALLOWED_ORIGINS = ["*"]
+# CORS_ALLOWED_ORIGINS = ["*"]
+CORS_ORIGIN_WHITELIST = ("*",)
 CORS_ALLOW_HEADERS = [
     "accept",
     "accept-encoding",
