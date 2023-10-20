@@ -246,6 +246,7 @@ def delete_targets(request):
 def delete_targets_api(request):
     context = {"status": False}
     if request.method == "POST":
+        print(request.body, "bo")
         list_of_domains = request.body["targets"]
         try:
             count = 0
