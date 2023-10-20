@@ -77,7 +77,6 @@ TEMPLATES = [
 WSGI_APPLICATION = "reNgine.wsgi.application"
 
 CORS_ORIGIN_ALLOW_ALL = True
-
 # REST Framework
 
 REST_FRAMEWORK = {
