@@ -243,11 +243,15 @@ def delete_targets(request):
     return http.HttpResponseRedirect(reverse("list_target"))
 
 
+import json
+
+
 def delete_targets_api(request):
     context = {"status": False}
     if request.method == "POST":
         print(request.body, "bo")
-        list_of_domains = request.body["targets"]
+        data = json.loads(request.body.decode("utf-8"))
+        list_of_domains = data["targets"]
         try:
             count = 0
             for id in list_of_domains:
