@@ -1871,37 +1871,33 @@ class IPToDomain(APIView):
         print(req.query_params, "q")
         ip_address = req.query_params.get("ip_address")
         if not ip_address:
-			return Response({
-				'status': False,
-				'message': 'IP Address Required'
-			})
-		try:
-			logging.info(f'Resolving IP address {ip_address} ...')
-			domain, domains, ips = socket.gethostbyaddr(ip_address)
-			response = {
-				'status': True,
-				'ip_address': ip_address,
-				'domains': domains or [domain],
-				'resolves_to': domain
-			}
-		except socket.herror: # ip does not have a PTR record
-			logging.info(f'No PTR record for {ip_address}')
-			response = {
-				'status': True,
-				'ip_address': ip_address,
-				'domains': [ip_address],
-				'resolves_to': ip_address
-			}
-		except Exception as e:
-			logging.info(e)
-			response = {
-				'status': False,
-				'ip_address': ip_address,
-				'message': 'Exception {}'.format(e)
-			}
-		finally:
-			return Response(response)
-
+            return Response({"status": False, "message": "IP Address Required"})
+        try:
+            logging.info(f"Resolving IP address {ip_address} ...")
+            domain, domains, ips = socket.gethostbyaddr(ip_address)
+            response = {
+                "status": True,
+                "ip_address": ip_address,
+                "domains": domains or [domain],
+                "resolves_to": domain,
+            }
+        except socket.herror:  # ip does not have a PTR record
+            logging.info(f"No PTR record for {ip_address}")
+            response = {
+                "status": True,
+                "ip_address": ip_address,
+                "domains": [ip_address],
+                "resolves_to": ip_address,
+            }
+        except Exception as e:
+            logging.info(e)
+            response = {
+                "status": False,
+                "ip_address": ip_address,
+                "message": "Exception {}".format(e),
+            }
+        finally:
+            return Response(response)
 
 
 class VulnerabilityReport(APIView):
