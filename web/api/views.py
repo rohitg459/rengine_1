@@ -145,7 +145,6 @@ class AddTarget(APIView):
                 else:
                     msg = f"{target} is not a valid domain, IP, or URL. Skipped."
                     logging.info(msg)
-                    messages.add_message(request, messages.WARNING, msg)
                     continue
 
                 logging.info(
@@ -192,17 +191,13 @@ class AddTarget(APIView):
                         logging.info(f"Added new port {port.number}.")
         except Exception as e:
             logging.info(e)
-            messages.add_message(
-                request, messages.ERROR, f"Exception while adding domain: {e}"
             )
             context["desc"] = f"Exception while adding domain: {e}"
             return Response(context)
 
         # No targets added, redirect to add target page
         if added_target_count == 0:
-            messages.add_message(
                 request,
-                messages.ERROR,
                 "Oops! Could not import any targets, either targets already exists or is not a valid target.",
             )
             context[
@@ -212,7 +207,6 @@ class AddTarget(APIView):
 
         # Targets added successfully, redirect to targets list
         msg = f"{added_target_count} targets added successfully"
-        messages.add_message(request, messages.SUCCESS, msg)
         context["status"] = True
         context["desc"] = msg
         return Response(context)
