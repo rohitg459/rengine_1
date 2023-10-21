@@ -54,6 +54,7 @@ from django.db.models.functions import Concat
 from datetime import datetime, timedelta
 from urllib.parse import urlparse
 
+
 def get_ip_info(ip_address):
     is_ipv4 = bool(validators.ipv4(ip_address))
     is_ipv6 = bool(validators.ipv6(ip_address))
@@ -66,18 +67,23 @@ def get_ip_info(ip_address):
         return None
     return ip_data
 
+
 def get_ips_from_cidr_range(target):
     try:
         return [str(ip) for ip in ipaddress.IPv4Network(target)]
     except Exception as e:
-        logger.error(f'{target} is not a valid CIDR range. Skipping.')
+        logger.error(f"{target} is not a valid CIDR range. Skipping.")
+
 
 class AddTarget(APIView):
     def post(self, request):
         req = self.request
         data = req.data
         print(data, "trdata")
-        context={"status":False}
+        context = {"status": False}
+
+        org_instance = Organization.objects.get(id=data["org_id"])
+
         added_target_count = 0
         multiple_targets = data.get("addTargets")
         description = data.get("targetDescription", "")
@@ -86,9 +92,7 @@ class AddTarget(APIView):
         try:
             # Multiple targets
             # if multiple_targets:
-            bulk_targets = [
-                t.rstrip() for t in multiple_targets.split(",") if t
-            ]
+            bulk_targets = [t.rstrip() for t in multiple_targets.split(",") if t]
             logging.info(f"Adding multiple targets: {bulk_targets}")
             for target in bulk_targets:
                 target = target.rstrip("\n")
@@ -159,6 +163,7 @@ class AddTarget(APIView):
                         )
                         domain.insert_date = timezone.now()
                         domain.save()
+                        org_instance.domains.add(domain)
                         added_target_count += 1
                         if created:
                             logging.info(f"Added new domain {domain.name}")
@@ -190,7 +195,7 @@ class AddTarget(APIView):
             messages.add_message(
                 request, messages.ERROR, f"Exception while adding domain: {e}"
             )
-            context["desc"]=f"Exception while adding domain: {e}"
+            context["desc"] = f"Exception while adding domain: {e}"
             return Response(context)
 
         # No targets added, redirect to add target page
@@ -200,16 +205,17 @@ class AddTarget(APIView):
                 messages.ERROR,
                 "Oops! Could not import any targets, either targets already exists or is not a valid target.",
             )
-            context["desc"]=f"Oops! Could not import any targets, either targets already exists or is not a valid target."
+            context[
+                "desc"
+            ] = f"Oops! Could not import any targets, either targets already exists or is not a valid target."
             return Response(context)
 
         # Targets added successfully, redirect to targets list
         msg = f"{added_target_count} targets added successfully"
         messages.add_message(request, messages.SUCCESS, msg)
-        context["status"]=True
-        context["desc"]=msg
+        context["status"] = True
+        context["desc"] = msg
         return Response(context)
-
 
     # target_name = data.get("domain_name")
     # h1_team_handle = data.get("h1_team_handle")
