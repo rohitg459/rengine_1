@@ -14,6 +14,25 @@ from scanEngine.models import EngineType
 from reNgine.utilities import *
 
 
+class hybrid_property:
+    def __init__(self, func):
+        self.func = func
+        self.name = func.__name__
+        self.exp = None
+
+    def __get__(self, instance, owner):
+        if instance is None:
+            return self
+        return self.func(instance)
+
+    def __set__(self, instance, value):
+        pass
+
+    def expression(self, exp):
+        self.exp = exp
+        return self
+
+
 class ScanHistory(models.Model):
     id = models.AutoField(primary_key=True)
     start_scan_date = models.DateTimeField()
@@ -333,37 +352,47 @@ class SubScan(models.Model):
         else:
             return "Unknown"
 
+
 class EndPoint(models.Model):
-	id = models.AutoField(primary_key=True)
-	scan_history = models.ForeignKey(ScanHistory, on_delete=models.CASCADE, null=True, blank=True)
-	target_domain = models.ForeignKey(
-		Domain, on_delete=models.CASCADE, null=True, blank=True)
-	subdomain = models.ForeignKey(
-		Subdomain,
-		on_delete=models.CASCADE,
-		null=True,
-		blank=True)
-	source = models.CharField(max_length=200, null=True, blank=True)
-	http_url = models.CharField(max_length=30000)
-	content_length = models.IntegerField(default=0, null=True, blank=True)
-	page_title = models.CharField(max_length=30000, null=True, blank=True)
-	http_status = models.IntegerField(default=0, null=True, blank=True)
-	content_type = models.CharField(max_length=100, null=True, blank=True)
-	discovered_date = models.DateTimeField(blank=True, null=True)
-	response_time = models.FloatField(null=True, blank=True)
-	webserver = models.CharField(max_length=1000, blank=True, null=True)
-	is_default = models.BooleanField(null=True, blank=True, default=False)
-	matched_gf_patterns = models.CharField(max_length=10000, null=True, blank=True)
-	techs = models.ManyToManyField('Technology', related_name='techs', null=True, blank=True)
-	# used for subscans
-	endpoint_subscan_ids = models.ManyToManyField('SubScan', related_name='endpoint_subscan_ids', blank=True)
+    id = models.AutoField(primary_key=True)
+    scan_history = models.ForeignKey(
+        ScanHistory, on_delete=models.CASCADE, null=True, blank=True
+    )
+    target_domain = models.ForeignKey(
+        Domain, on_delete=models.CASCADE, null=True, blank=True
+    )
+    subdomain = models.ForeignKey(
+        Subdomain, on_delete=models.CASCADE, null=True, blank=True
+    )
+    source = models.CharField(max_length=200, null=True, blank=True)
+    http_url = models.CharField(max_length=30000)
+    content_length = models.IntegerField(default=0, null=True, blank=True)
+    page_title = models.CharField(max_length=30000, null=True, blank=True)
+    http_status = models.IntegerField(default=0, null=True, blank=True)
+    content_type = models.CharField(max_length=100, null=True, blank=True)
+    discovered_date = models.DateTimeField(blank=True, null=True)
+    response_time = models.FloatField(null=True, blank=True)
+    webserver = models.CharField(max_length=1000, blank=True, null=True)
+    is_default = models.BooleanField(null=True, blank=True, default=False)
+    matched_gf_patterns = models.CharField(max_length=10000, null=True, blank=True)
+    techs = models.ManyToManyField(
+        "Technology", related_name="techs", null=True, blank=True
+    )
+    # used for subscans
+    endpoint_subscan_ids = models.ManyToManyField(
+        "SubScan", related_name="endpoint_subscan_ids", blank=True
+    )
 
-	def __str__(self):
-		return self.http_url
+    def __str__(self):
+        return self.http_url
 
-	@hybrid_property
-	def is_alive(self):
-		return self.http_status and (0 < self.http_status < 500) and self.http_status != 404
+    @hybrid_property
+    def is_alive(self):
+        return (
+            self.http_status
+            and (0 < self.http_status < 500)
+            and self.http_status != 404
+        )
 
 
 class VulnerabilityTags(models.Model):
