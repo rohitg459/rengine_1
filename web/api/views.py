@@ -158,10 +158,10 @@ class AddTarget(APIView):
                             description=description,
                             h1_team_handle=h1_team_handle,
                             # project=project,
+                            insert_date=timezone.now(),
                             ip_address_cidr=domain_name if is_ip else None,
                         )
-                        domain.insert_date = timezone.now()
-                        domain.save()
+                        # domain.save()
                         org_instance.domains.add(domain)
                         added_target_count += 1
                         if created:
