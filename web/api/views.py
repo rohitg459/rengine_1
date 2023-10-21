@@ -191,15 +191,11 @@ class AddTarget(APIView):
                         logging.info(f"Added new port {port.number}.")
         except Exception as e:
             logging.info(e)
-            )
             context["desc"] = f"Exception while adding domain: {e}"
             return Response(context)
 
         # No targets added, redirect to add target page
         if added_target_count == 0:
-                request,
-                "Oops! Could not import any targets, either targets already exists or is not a valid target.",
-            )
             context[
                 "desc"
             ] = f"Oops! Could not import any targets, either targets already exists or is not a valid target."
