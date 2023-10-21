@@ -52,61 +52,212 @@ from django.db.models import CharField, Value
 from django.db.models.functions import Concat
 
 from datetime import datetime, timedelta
+from urllib.parse import urlparse
 
+def get_ip_info(ip_address):
+    is_ipv4 = bool(validators.ipv4(ip_address))
+    is_ipv6 = bool(validators.ipv6(ip_address))
+    ip_data = None
+    if is_ipv4:
+        ip_data = ipaddress.IPv4Address(ip_address)
+    elif is_ipv6:
+        ip_data = ipaddress.IPv6Address(ip_address)
+    else:
+        return None
+    return ip_data
+
+def get_ips_from_cidr_range(target):
+    try:
+        return [str(ip) for ip in ipaddress.IPv4Network(target)]
+    except Exception as e:
+        logger.error(f'{target} is not a valid CIDR range. Skipping.')
 
 class AddTarget(APIView):
     def post(self, request):
         req = self.request
         data = req.data
         print(data, "trdata")
+        context={"status":False}
+        added_target_count = 0
+        multiple_targets = data.get("addTargets")
+        description = data.get("targetDescription", "")
+        h1_team_handle = data.get("targetH1TeamHandle", "")
 
-        target_name = data.get("domain_name")
-        h1_team_handle = data.get("h1_team_handle")
-        description = data.get("description")
-        ip_address = data.get("ip_address")
+        try:
+            # Multiple targets
+            # if multiple_targets:
+            bulk_targets = [
+                t.rstrip() for t in multiple_targets.split(",") if t
+            ]
+            logging.info(f"Adding multiple targets: {bulk_targets}")
+            for target in bulk_targets:
+                target = target.rstrip("\n")
+                http_urls = []
+                domains = []
+                ports = []
+                ips = []
 
-        if not target_name:
-            return Response({"status": False, "message": "domain_name missing!"})
+                # Validate input and find what type of address it is.
+                # Valid inputs are URLs, Domains, or IP addresses.
+                # TODO: support IP CIDR ranges (auto expand range and
+                # save new found ips to DB)
+                is_domain = bool(validators.domain(target))
+                is_ip = bool(validators.ipv4(target)) or bool(validators.ipv6(target))
+                is_range = bool(validators.ipv4_cidr(target)) or bool(
+                    validators.ipv6_cidr(target)
+                )
+                is_url = bool(validators.url(target))
 
-        # validate if target_name is a valid domain_name
-        if not validators.domain(target_name):
-            return Response({"status": False, "message": "Invalid Domain or IP"})
+                # Set ip_domain / http_url based on type of input
+                logging.info(
+                    f"{target} | Domain? {is_domain} | IP? {is_ip} | CIDR range? {is_range} | URL? {is_url}"
+                )
 
-        org_instance = Organization.objects.get(id=data["org_id"])
-        print(org_instance, "oiiins")
-        if Domain.objects.filter(name=target_name).exists():
-            domain = Domain.objects.get(name=target_name)
-            if ip_address:
-                domain.ip_address_cidr = ip_address
-            domain.save()
-            org_instance.domains.add(domain)
-            return Response(
-                {
-                    "status": False,
-                    "message": "Target already exists!",
-                    "domain_id": domain.id,
-                }
+                if is_domain:
+                    domains.append(target)
+
+                elif is_url:
+                    url = urlparse(target)
+                    http_url = url.geturl()
+                    http_urls.append(http_url)
+                    split = url.netloc.split(":")
+                    if len(split) == 1:
+                        domain = split[0]
+                        domains.append(domain)
+                    if len(split) == 2:
+                        domain, port_number = tuple(split)
+                        domains.append(domain)
+                        ports.append(port_number)
+
+                elif is_ip:
+                    ips.append(target)
+                    domains.append(target)
+
+                elif is_range:
+                    ips = get_ips_from_cidr_range(target)
+                    for ip_address in ips:
+                        ips.append(ip_address)
+                        domains.append(ip_address)
+                else:
+                    msg = f"{target} is not a valid domain, IP, or URL. Skipped."
+                    logging.info(msg)
+                    messages.add_message(request, messages.WARNING, msg)
+                    continue
+
+                logging.info(
+                    f"IPs: {ips} | Domains: {domains} | URLs: {http_urls} | Ports: {ports}"
+                )
+
+                for domain_name in domains:
+                    if not Domain.objects.filter(name=domain_name).exists():
+                        domain, created = Domain.objects.get_or_create(
+                            name=domain_name,
+                            description=description,
+                            h1_team_handle=h1_team_handle,
+                            # project=project,
+                            ip_address_cidr=domain_name if is_ip else None,
+                        )
+                        domain.insert_date = timezone.now()
+                        domain.save()
+                        added_target_count += 1
+                        if created:
+                            logging.info(f"Added new domain {domain.name}")
+
+                for http_url in http_urls:
+                    http_url = sanitize_url(http_url)
+                    endpoint, created = EndPoint.objects.get_or_create(
+                        target_domain=domain, http_url=http_url
+                    )
+                    if created:
+                        logging.info(f"Added new endpoint {endpoint.http_url}")
+
+                for ip_address in ips:
+                    ip_data = get_ip_info(ip_address)
+                    ip, created = IpAddress.objects.get_or_create(address=ip_address)
+                    ip.reverse_pointer = ip_data.reverse_pointer
+                    ip.is_private = ip_data.is_private
+                    ip.version = ip_data.version
+                    ip.save()
+                    if created:
+                        logging.info(f"Added new IP {ip}")
+
+                for port in ports:
+                    port, created = Port.objects.get_or_create(number=port_number)
+                    if created:
+                        logging.info(f"Added new port {port.number}.")
+        except Exception as e:
+            logging.info(e)
+            messages.add_message(
+                request, messages.ERROR, f"Exception while adding domain: {e}"
             )
+            context["desc"]=f"Exception while adding domain: {e}"
+            return Response(context)
 
-        domain = Domain()
-        domain.description = description
-        domain.name = target_name
-        domain.insert_date = timezone.now()
-        domain.h1_team_handle = h1_team_handle
+        # No targets added, redirect to add target page
+        if added_target_count == 0:
+            messages.add_message(
+                request,
+                messages.ERROR,
+                "Oops! Could not import any targets, either targets already exists or is not a valid target.",
+            )
+            context["desc"]=f"Oops! Could not import any targets, either targets already exists or is not a valid target."
+            return Response(context)
 
-        if ip_address:
-            domain.ip_address_cidr = ip_address
-        domain.save()
-        org_instance.domains.add(domain)
+        # Targets added successfully, redirect to targets list
+        msg = f"{added_target_count} targets added successfully"
+        messages.add_message(request, messages.SUCCESS, msg)
+        context["status"]=True
+        context["desc"]=msg
+        return Response(context)
 
-        return Response(
-            {
-                "status": True,
-                "message": "Domain successfully added as target!",
-                "domain_name": target_name,
-                "domain_id": domain.id,
-            }
-        )
+
+    # target_name = data.get("domain_name")
+    # h1_team_handle = data.get("h1_team_handle")
+    # description = data.get("description")
+    # ip_address = data.get("ip_address")
+
+    # if not target_name:
+    #     return Response({"status": False, "message": "domain_name missing!"})
+
+    # # validate if target_name is a valid domain_name
+    # if not validators.domain(target_name):
+    #     return Response({"status": False, "message": "Invalid Domain or IP"})
+
+    # org_instance = Organization.objects.get(id=data["org_id"])
+    # print(org_instance, "oiiins")
+    # if Domain.objects.filter(name=target_name).exists():
+    #     domain = Domain.objects.get(name=target_name)
+    #     if ip_address:
+    #         domain.ip_address_cidr = ip_address
+    #     domain.save()
+    #     org_instance.domains.add(domain)
+    #     return Response(
+    #         {
+    #             "status": False,
+    #             "message": "Target already exists!",
+    #             "domain_id": domain.id,
+    #         }
+    #     )
+
+    # domain = Domain()
+    # domain.description = description
+    # domain.name = target_name
+    # domain.insert_date = timezone.now()
+    # domain.h1_team_handle = h1_team_handle
+
+    # if ip_address:
+    #     domain.ip_address_cidr = ip_address
+    # domain.save()
+    # org_instance.domains.add(domain)
+
+    # return Response(
+    #     {
+    #         "status": True,
+    #         "message": "Domain successfully added as target!",
+    #         "domain_name": target_name,
+    #         "domain_id": domain.id,
+    #     }
+    # )
 
 
 class AddOrganization(APIView):
@@ -694,7 +845,7 @@ class ScheduleStartScan(APIView):
         host_id = data.get("domainId")
         is_schedule = data.get("schedule")
         org_id = data.get("orgId")
-        # for subdomain in request.POST["importSubdomainTextArea"].split("\n")
+        # for subdomain in data["importSubdomainTextArea"].split("\n")
         # for subdomain in request.POST["outOfScopeSubdomainTextarea"].split(",")
         import_subdomain = data.get("importSubdomainTextArea")
         out_of_scope_subdomain = data.get("outOfScopeSubdomainTextarea")
@@ -1301,61 +1452,61 @@ class ToggleSubdomainImportantStatus(APIView):
         return Response(response)
 
 
-class AddTarget(APIView):
-    def post(self, request):
-        req = self.request
-        data = req.data
+# class AddTarget(APIView):
+#     def post(self, request):
+#         req = self.request
+#         data = req.data
 
-        target_name = data.get("domain_name")
-        h1_team_handle = data.get("h1_team_handle")
-        description = data.get("description")
-        ip_address = data.get("ip_address")
+#         target_name = data.get("domain_name")
+#         h1_team_handle = data.get("h1_team_handle")
+#         description = data.get("description")
+#         ip_address = data.get("ip_address")
 
-        try:
-            if not target_name:
-                return Response({"status": False, "message": "domain_name missing!"})
+#         try:
+#             if not target_name:
+#                 return Response({"status": False, "message": "domain_name missing!"})
 
-            # validate if target_name is a valid domain_name
-            if not validators.domain(target_name):
-                return Response({"status": False, "message": "Invalid Domain or IP"})
+#             # validate if target_name is a valid domain_name
+#             if not validators.domain(target_name):
+#                 return Response({"status": False, "message": "Invalid Domain or IP"})
 
-            org_instance = Organization.objects.get(id=data["org_id"])
-            print(org_instance, "oiiins")
-            if Domain.objects.filter(name=target_name).exists():
-                domain = Domain.objects.get(name=target_name)
-                if ip_address:
-                    domain.ip_address_cidr = ip_address
-                domain.save()
-                org_instance.domains.add(domain)
-                return Response(
-                    {
-                        "status": False,
-                        "message": "Target already exists!",
-                        "domain_id": domain.id,
-                    }
-                )
+#             org_instance = Organization.objects.get(id=data["org_id"])
+#             print(org_instance, "oiiins")
+#             if Domain.objects.filter(name=target_name).exists():
+#                 domain = Domain.objects.get(name=target_name)
+#                 if ip_address:
+#                     domain.ip_address_cidr = ip_address
+#                 domain.save()
+#                 org_instance.domains.add(domain)
+#                 return Response(
+#                     {
+#                         "status": False,
+#                         "message": "Target already exists!",
+#                         "domain_id": domain.id,
+#                     }
+#                 )
 
-            domain = Domain()
-            domain.description = description
-            domain.name = target_name
-            domain.insert_date = timezone.now()
-            domain.h1_team_handle = h1_team_handle
+#             domain = Domain()
+#             domain.description = description
+#             domain.name = target_name
+#             domain.insert_date = timezone.now()
+#             domain.h1_team_handle = h1_team_handle
 
-            if ip_address:
-                domain.ip_address_cidr = ip_address
-            domain.save()
-            org_instance.domains.add(domain)
+#             if ip_address:
+#                 domain.ip_address_cidr = ip_address
+#             domain.save()
+#             org_instance.domains.add(domain)
 
-            return Response(
-                {
-                    "status": True,
-                    "message": "Domain successfully added as target!",
-                    "domain_name": target_name,
-                    "domain_id": domain.id,
-                }
-            )
-        except Exception as e:
-            return Response({"status": False, "desc": str(e)})
+#             return Response(
+#                 {
+#                     "status": True,
+#                     "message": "Domain successfully added as target!",
+#                     "domain_name": target_name,
+#                     "domain_id": domain.id,
+#                 }
+#             )
+#         except Exception as e:
+#             return Response({"status": False, "desc": str(e)})
 
 
 class FetchSubscanResults(APIView):
