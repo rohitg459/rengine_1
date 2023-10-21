@@ -38,7 +38,7 @@ INSTALLED_APPS = [
     "django_celery_beat",
     "mathfilters",
     "drf_yasg",
-    # "corsheaders",
+    "corsheaders",
 ]
 CORS_ALLOW_HEADERS = [
     "x-csrftoken",
