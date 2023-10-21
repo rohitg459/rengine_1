@@ -1870,62 +1870,38 @@ class IPToDomain(APIView):
         req = self.request
         print(req.query_params, "q")
         ip_address = req.query_params.get("ip_address")
-        if ip_address:
-            print(ip_address, "q")
-            options = FirefoxOptions()
-            options.add_argument("--headless")
-            driver = webdriver.Firefox(options=options)
+        if not ip_address:
+			return Response({
+				'status': False,
+				'message': 'IP Address Required'
+			})
+		try:
+			logging.info(f'Resolving IP address {ip_address} ...')
+			domain, domains, ips = socket.gethostbyaddr(ip_address)
+			response = {
+				'status': True,
+				'ip_address': ip_address,
+				'domains': domains or [domain],
+				'resolves_to': domain
+			}
+		except socket.herror: # ip does not have a PTR record
+			logging.info(f'No PTR record for {ip_address}')
+			response = {
+				'status': True,
+				'ip_address': ip_address,
+				'domains': [ip_address],
+				'resolves_to': ip_address
+			}
+		except Exception as e:
+			logging.info(e)
+			response = {
+				'status': False,
+				'ip_address': ip_address,
+				'message': 'Exception {}'.format(e)
+			}
+		finally:
+			return Response(response)
 
-            # ip address may contain ip or CIDR, for ip use ip for CIDR use address
-            # as /net
-            if "/" in ip_address:
-                driver.get("https://bgp.he.net/net/{}#_dns".format(ip_address))
-            else:
-                driver.get("https://bgp.he.net/ip/{}#_dns".format(ip_address))
-
-            try:
-                element = WebDriverWait(driver, 30).until(
-                    EC.presence_of_element_located((By.ID, "tab_dns"))
-                )
-                # get all elements
-                elems = driver.find_elements_by_xpath(
-                    "//a[starts-with(@href, '/dns/')]"
-                )
-                # remove empty domains as well
-                domains = [elem.text for elem in elems if elem.text]
-
-                # make domains list unique
-                domains = list(set(domains))
-
-                response = {
-                    "status": True,
-                    "ip_address": ip_address,
-                    "domains": domains,
-                    "resolves_to": domains[0],
-                }
-
-                # whois data
-                # click on whois tab
-                whois_button = driver.find_element_by_xpath("//li[@id='tab_whois']")
-                whois_button.click()
-
-                whois_element = driver.find_element_by_xpath("//div[@id='whois']/pre")
-                if whois_element:
-                    response["whois"] = whois_element.text
-            except Exception as e:
-                print(e, "log")
-                logging.error(e)
-                response = {
-                    "status": False,
-                    "ip_address": ip_address,
-                    "message": "Exception {}".format(e),
-                }
-            finally:
-                driver.quit()
-                return Response(response)
-        return Response(
-            {"status": False, "message": "IP Address Required", "q": req.query_params}
-        )
 
 
 class VulnerabilityReport(APIView):
