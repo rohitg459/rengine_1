@@ -1869,7 +1869,7 @@ class IPToDomain(APIView):
     def get(self, request):
         req = self.request
         print(req.query_params, "q")
-        ip_address = req.query_params.get("ip_address")[0]
+        ip_address = req.query_params.get("ip_address")
         print(ip_address, "q")
         try:
             if ip_address:
