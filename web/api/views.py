@@ -1865,6 +1865,9 @@ class CMSDetector(APIView):
         return Response(response)
 
 
+import socket
+
+
 class IPToDomain(APIView):
     def get(self, request):
         req = self.request
