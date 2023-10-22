@@ -30,6 +30,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_datatables",
     "dashboard.apps.DashboardConfig",
+    "corsheaders",
     "targetApp.apps.TargetappConfig",
     "scanEngine.apps.ScanengineConfig",
     "startScan.apps.StartscanConfig",
@@ -38,12 +39,7 @@ INSTALLED_APPS = [
     "django_celery_beat",
     "mathfilters",
     "drf_yasg",
-    "corsheaders",
 ]
-CORS_ALLOW_HEADERS = [
-    "x-csrftoken",
-]
-CORS_ALLOW_CREDENTIALS = True
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
@@ -100,6 +96,10 @@ CORS_ALLOW_HEADERS = [
     "x-requested-with",
 ]
 
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = [
+    "x-csrftoken",
+]
 CORS_ALLOW_CREDENTIALS = True
 
 ALLOWED_HOSTS = ["*"]
