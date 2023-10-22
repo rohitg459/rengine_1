@@ -132,7 +132,7 @@ urlpatterns = [
     path("scan_status/", ScanStatus.as_view(), name="scan_status"),
     # ----------------------------------------------------------------
     path("add/organization/", AddOrganization.as_view(), name="addOrganization"),
-    path("add/target/multiple", AddTarget.as_view(), name="addTarget"),
+    path("add/target/multiple/", AddTarget.as_view(), name="addTarget"),
     path("dashboard/", Dashboard.as_view(), name="dashboard"),
     path("notification/", NotificationAPi.as_view(), name="notificationApi"),
     path("org_scan_status/", OrgScanStatus.as_view(), name="org_scan_status"),
