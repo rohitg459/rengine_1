@@ -1039,7 +1039,7 @@ class ScheduleStartScan(APIView):
                             )
                         else:
                             return Response(
-                                {"status": False, "desc": "scheduled mode is missing"}
+                                {"status": False, "desc": "scheduled_mode is missing"}
                             )
                     return Response({"status": True})
             else:
