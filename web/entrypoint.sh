@@ -13,6 +13,8 @@ fi
 
 python3 manage.py migrate
 
+python3 -m pip install django-cors-headers
+
 python3 manage.py runserver 0.0.0.0:8000
 
 exec "$@"

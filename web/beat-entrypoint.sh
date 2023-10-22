@@ -17,5 +17,6 @@ while ! celery -A reNgine status; do
 done
 
 python3 manage.py migrate
+python3 -m pip install django-cors-headers
 
 exec "$@"

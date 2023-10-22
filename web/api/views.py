@@ -741,8 +741,11 @@ class Dashboard(APIView):
             )
 
             context["asset_countries"] = (
-                CountryISO.objects.filter(id__in=ctr_iso_id)
-                .annotate(count=Count("ipaddress"))
+                # CountryISO.objects.filter(id__in=ctr_iso_id)
+                # .annotate(count=Count("ipaddress"))
+                # .order_by("-count")
+                # .values()
+                CountryISO.objects.annotate(count=Count("ipaddress"))
                 .order_by("-count")
                 .values()
             )
