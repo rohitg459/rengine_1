@@ -745,10 +745,10 @@ class Dashboard(APIView):
                 .annotate(count=Count("geo_iso__name"))
             )
             context["asset_countries"] = [c[i] for i in range(len(c))]
-            context["status"] = True
+            # context["status"] = True
             return Response(context)
         except Exception as e:
-            print(e)
+            print(e, "dss")
             return Response({"desc": str(e), "status": False})
 
 
