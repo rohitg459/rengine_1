@@ -837,134 +837,63 @@ class ScheduleStartScan(APIView):
     def post(self, request):
         # schedule single domain and org scan
         # start multile domain scan
-        req = self.request
-        data = req.data
-        list_of_domains = data.get("listOfDomainId")
-        host_id = data.get("domainId")
-        is_schedule = data.get("schedule")
-        org_id = data.get("orgId")
-        # for subdomain in data["importSubdomainTextArea"].split("\n")
-        # for subdomain in request.POST["outOfScopeSubdomainTextarea"].split(",")
-        import_subdomain = data.get("importSubdomainTextArea")
-        out_of_scope_subdomain = data.get("outOfScopeSubdomainTextarea")
-        engine_type = data["scanMode"]
-        scheduled_mode = data.get("scheduledMode")
-        print(
-            list_of_domains,
-            host_id,
-            is_schedule,
-            org_id,
-            import_subdomain,
-            out_of_scope_subdomain,
-            engine_type,
-            scheduled_mode,
-            "rock",
-        )
-        # if request.method == "POST":
-        # get imported subdomains
-        if import_subdomain:
-            imported_subdomains = [
-                subdomain.rstrip() for subdomain in import_subdomain.split(",")
-            ]
-        else:
-            imported_subdomains = []
-        if imported_subdomains:
-            imported_subdomains = [
-                subdomain for subdomain in imported_subdomains if subdomain
-            ]
-        else:
-            imported_subdomains = []
-        if out_of_scope_subdomain:
-            out_of_scope_subdomains = [
-                subdomain.rstrip() for subdomain in out_of_scope_subdomain.split(",")
-            ]
-        else:
-            out_of_scope_subdomains = []
-        if out_of_scope_subdomains:
-            out_of_scope_subdomains = [
-                subdomain for subdomain in out_of_scope_subdomains if subdomain
-            ]
-        else:
-            out_of_scope_subdomains = []
-        # get engine type
-        # engine_type = int(request.POST["scan_mode"])
-        engine_object = get_object_or_404(EngineType, id=engine_type)
-        if is_schedule == True:
-            if host_id:
-                domain = Domain.objects.get(id=host_id)
-                task_name = (
-                    engine_object.engine_name
-                    + " for "
-                    + domain.name
-                    + ":"
-                    + str(
-                        datetime.datetime.strftime(timezone.now(), "%Y_%m_%d_%H_%M_%S")
-                    )
-                )
-                if scheduled_mode == "periodic":
-                    # periodic task
-                    frequency_value = int(data["frequency"])
-                    frequency_type = data["frequency_type"]
-                    if frequency_type == "minutes":
-                        period = IntervalSchedule.MINUTES
-                    elif frequency_type == "hours":
-                        period = IntervalSchedule.HOURS
-                    elif frequency_type == "days":
-                        period = IntervalSchedule.DAYS
-                    elif frequency_type == "weeks":
-                        period = IntervalSchedule.DAYS
-                        frequency_value *= 7
-                    elif frequency_type == "months":
-                        period = IntervalSchedule.DAYS
-                        frequency_value *= 30
-
-                    schedule, created = IntervalSchedule.objects.get_or_create(
-                        every=frequency_value,
-                        period=period,
-                    )
-                    _kwargs = json.dumps(
-                        {
-                            "domain_id": host_id,
-                            "scan_history_id": 0,
-                            "scan_type": 1,
-                            "engine_type": engine_type,
-                            "imported_subdomains": imported_subdomains,
-                        }
-                    )
-                    PeriodicTask.objects.create(
-                        interval=schedule,
-                        name=task_name,
-                        task="reNgine.tasks.initiate_scan",
-                        kwargs=_kwargs,
-                    )
-                elif scheduled_mode == "clocked":
-                    # clocked task
-                    schedule_time = data["scheduled_time"]
-                    print(schedule_time, "clll")
-                    clock, created = ClockedSchedule.objects.get_or_create(
-                        clocked_time=schedule_time,
-                    )
-                    _kwargs = json.dumps(
-                        {
-                            "domain_id": host_id,
-                            "scan_history_id": 0,
-                            "scan_type": 1,
-                            "engine_type": engine_type,
-                            "imported_subdomains": imported_subdomains,
-                        }
-                    )
-                    PeriodicTask.objects.create(
-                        clocked=clock,
-                        one_off=True,
-                        name=task_name,
-                        task="reNgine.tasks.initiate_scan",
-                        kwargs=_kwargs,
-                    )
-
-                return Response({"status": True})
-            if org_id:
-                organization = Organization.objects.get(id=org_id)
-                for domain in organization.get_domains():
+        try:
+            req = self.request
+            data = req.data
+            list_of_domains = data.get("listOfDomainId")
+            host_id = data.get("domainId")
+            is_schedule = data.get("schedule")
+            org_id = data.get("orgId")
+            # for subdomain in data["importSubdomainTextArea"].split("\n")
+            # for subdomain in request.POST["outOfScopeSubdomainTextarea"].split(",")
+            import_subdomain = data.get("importSubdomainTextArea")
+            out_of_scope_subdomain = data.get("outOfScopeSubdomainTextarea")
+            engine_type = data["scanMode"]
+            scheduled_mode = data.get("scheduledMode")
+            print(
+                list_of_domains,
+                host_id,
+                is_schedule,
+                org_id,
+                import_subdomain,
+                out_of_scope_subdomain,
+                engine_type,
+                scheduled_mode,
+                "rock",
+            )
+            # if request.method == "POST":
+            # get imported subdomains
+            if import_subdomain:
+                imported_subdomains = [
+                    subdomain.rstrip() for subdomain in import_subdomain.split(",")
+                ]
+            else:
+                imported_subdomains = []
+            if imported_subdomains:
+                imported_subdomains = [
+                    subdomain for subdomain in imported_subdomains if subdomain
+                ]
+            else:
+                imported_subdomains = []
+            if out_of_scope_subdomain:
+                out_of_scope_subdomains = [
+                    subdomain.rstrip()
+                    for subdomain in out_of_scope_subdomain.split(",")
+                ]
+            else:
+                out_of_scope_subdomains = []
+            if out_of_scope_subdomains:
+                out_of_scope_subdomains = [
+                    subdomain for subdomain in out_of_scope_subdomains if subdomain
+                ]
+            else:
+                out_of_scope_subdomains = []
+            # get engine type
+            # engine_type = int(request.POST["scan_mode"])
+            engine_object = get_object_or_404(EngineType, id=engine_type)
+            if is_schedule == True:
+                if host_id:
+                    domain = Domain.objects.get(id=host_id)
                     task_name = (
                         engine_object.engine_name
                         + " for "
@@ -999,11 +928,11 @@ class ScheduleStartScan(APIView):
                         )
                         _kwargs = json.dumps(
                             {
-                                "domain_id": domain.id,
+                                "domain_id": host_id,
                                 "scan_history_id": 0,
                                 "scan_type": 1,
                                 "engine_type": engine_type,
-                                "imported_subdomains": None,
+                                "imported_subdomains": imported_subdomains,
                             }
                         )
                         PeriodicTask.objects.create(
@@ -1015,16 +944,17 @@ class ScheduleStartScan(APIView):
                     elif scheduled_mode == "clocked":
                         # clocked task
                         schedule_time = data["scheduled_time"]
+                        print(schedule_time, "clll")
                         clock, created = ClockedSchedule.objects.get_or_create(
                             clocked_time=schedule_time,
                         )
                         _kwargs = json.dumps(
                             {
-                                "domain_id": domain.id,
+                                "domain_id": host_id,
                                 "scan_history_id": 0,
                                 "scan_type": 1,
                                 "engine_type": engine_type,
-                                "imported_subdomains": None,
+                                "imported_subdomains": imported_subdomains,
                             }
                         )
                         PeriodicTask.objects.create(
@@ -1034,25 +964,100 @@ class ScheduleStartScan(APIView):
                             task="reNgine.tasks.initiate_scan",
                             kwargs=_kwargs,
                         )
-                return Response({"status": True})
-        else:
-            print("ok")
 
-            if list_of_domains:
-                print("ya")
+                    return Response({"status": True})
+                if org_id:
+                    organization = Organization.objects.get(id=org_id)
+                    for domain in organization.get_domains():
+                        task_name = (
+                            engine_object.engine_name
+                            + " for "
+                            + domain.name
+                            + ":"
+                            + str(
+                                datetime.datetime.strftime(
+                                    timezone.now(), "%Y_%m_%d_%H_%M_%S"
+                                )
+                            )
+                        )
+                        if scheduled_mode == "periodic":
+                            # periodic task
+                            frequency_value = int(data["frequency"])
+                            frequency_type = data["frequency_type"]
+                            if frequency_type == "minutes":
+                                period = IntervalSchedule.MINUTES
+                            elif frequency_type == "hours":
+                                period = IntervalSchedule.HOURS
+                            elif frequency_type == "days":
+                                period = IntervalSchedule.DAYS
+                            elif frequency_type == "weeks":
+                                period = IntervalSchedule.DAYS
+                                frequency_value *= 7
+                            elif frequency_type == "months":
+                                period = IntervalSchedule.DAYS
+                                frequency_value *= 30
 
-                for domain_id in list_of_domains:
-                    # start the celery task
-                    scan_history_id = create_scan_object(domain_id, engine_type)
-                    celery_task = initiate_scan.apply_async(
-                        args=(domain_id, scan_history_id, 0, engine_type)
-                    )
-                    ScanHistory.objects.filter(id=scan_history_id).update(
-                        celery_id=celery_task.id
-                    )
-                print("true")
-                return Response({"status": True})
-        return Response({"status": False})
+                            schedule, created = IntervalSchedule.objects.get_or_create(
+                                every=frequency_value,
+                                period=period,
+                            )
+                            _kwargs = json.dumps(
+                                {
+                                    "domain_id": domain.id,
+                                    "scan_history_id": 0,
+                                    "scan_type": 1,
+                                    "engine_type": engine_type,
+                                    "imported_subdomains": None,
+                                }
+                            )
+                            PeriodicTask.objects.create(
+                                interval=schedule,
+                                name=task_name,
+                                task="reNgine.tasks.initiate_scan",
+                                kwargs=_kwargs,
+                            )
+                        elif scheduled_mode == "clocked":
+                            # clocked task
+                            schedule_time = data["scheduled_time"]
+                            clock, created = ClockedSchedule.objects.get_or_create(
+                                clocked_time=schedule_time,
+                            )
+                            _kwargs = json.dumps(
+                                {
+                                    "domain_id": domain.id,
+                                    "scan_history_id": 0,
+                                    "scan_type": 1,
+                                    "engine_type": engine_type,
+                                    "imported_subdomains": None,
+                                }
+                            )
+                            PeriodicTask.objects.create(
+                                clocked=clock,
+                                one_off=True,
+                                name=task_name,
+                                task="reNgine.tasks.initiate_scan",
+                                kwargs=_kwargs,
+                            )
+                    return Response({"status": True})
+            else:
+                print("ok")
+
+                if list_of_domains:
+                    print("ya")
+
+                    for domain_id in list_of_domains:
+                        # start the celery task
+                        scan_history_id = create_scan_object(domain_id, engine_type)
+                        celery_task = initiate_scan.apply_async(
+                            args=(domain_id, scan_history_id, 0, engine_type)
+                        )
+                        ScanHistory.objects.filter(id=scan_history_id).update(
+                            celery_id=celery_task.id
+                        )
+                    print("true")
+                    return Response({"status": True})
+        except Exception as e:
+            return Response({"status": False, "desc": str(e)})
 
 
 class QueryInterestingSubdomains(APIView):
