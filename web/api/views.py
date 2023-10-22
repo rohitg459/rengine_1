@@ -526,9 +526,11 @@ class Dashboard(APIView):
         critical_count = vulnerabilities.filter(severity=4).count()
         unknown_count = vulnerabilities.filter(severity=-1).count()
 
-        vulnerability_feed = Vulnerability.objects.filter(
-            target_domain__pk__in=org_domain
-        ).order_by("-discovered_date")[:20]
+        vulnerability_feed = (
+            Vulnerability.objects.filter(target_domain__pk__in=org_domain)
+            .order_by("-discovered_date")
+            .values()[:20]
+        )
         activity_feed = (
             ScanActivity.objects.filter(scan_of__pk__in=org_scan_id)
             .order_by("-time")
