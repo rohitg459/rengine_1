@@ -30,7 +30,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "rest_framework_datatables",
     "dashboard.apps.DashboardConfig",
-    # "corsheaders",
+    "corsheaders",
     "targetApp.apps.TargetappConfig",
     "scanEngine.apps.ScanengineConfig",
     "startScan.apps.StartscanConfig",
