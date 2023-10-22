@@ -498,9 +498,7 @@ class Dashboard(APIView):
             endpoint = EndPoint.objects.filter(target_domain__pk__in=org_domain)
             endpoint_count = endpoint.count()
             scan_count = org_scan_history.count()
-            subdomain = Subdomain.objects.filter(
-                target_domain__pk__in=org_domain
-            )
+            subdomain = Subdomain.objects.filter(target_domain__pk__in=org_domain)
             subdomain_count = subdomain.count()
             subdomain_with_ip_count = Subdomain.objects.filter(
                 target_domain__pk__in=org_domain, ip_addresses__isnull=False
@@ -669,7 +667,7 @@ class Dashboard(APIView):
             endpoints_in_last_week.reverse()
 
             context = {
-                "dashboard_data_active": "active",
+                "status": True,
                 "domain_count": domain_count,
                 "endpoint_count": endpoint_count,
                 "scan_count": scan_count,
@@ -746,7 +744,8 @@ class Dashboard(APIView):
                 # .annotate(count=Count("ipaddress"))
                 # .order_by("-count")
                 # .values()
-                CountryISO.objects.filter(ipaddress__subdomain__id__in=list(subdomain.values_list("id",flat=True))).annotate(count=Count("ipaddress"))
+                CountryISO.objects.filter(ipaddress__id__in=org_ip_id)
+                .annotate(count=Count("ipaddress"))
                 .order_by("-count")
                 .values()
             )
@@ -755,7 +754,7 @@ class Dashboard(APIView):
             return Response(context)
         except Exception as e:
             print(e)
-            return Response({"desc": str(e)})
+            return Response({"desc": str(e), "status": False})
 
 
 class OrgScanStatus(APIView):
