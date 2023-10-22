@@ -972,6 +972,7 @@ class ScheduleStartScan(APIView):
                 if org_id:
                     organization = Organization.objects.get(id=org_id)
                     for domain in organization.get_domains():
+                        print(domain, "1")
                         task_name = (
                             engine_object.engine_name
                             + " for "
