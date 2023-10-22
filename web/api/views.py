@@ -1037,6 +1037,10 @@ class ScheduleStartScan(APIView):
                                 task="reNgine.tasks.initiate_scan",
                                 kwargs=_kwargs,
                             )
+                        else:
+                            return Response(
+                                {"status": False, "desc": "scheduled mode is missing"}
+                            )
                     return Response({"status": True})
             else:
                 print("ok")
