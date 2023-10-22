@@ -744,7 +744,7 @@ class Dashboard(APIView):
                 # .annotate(count=Count("ipaddress"))
                 # .order_by("-count")
                 # .values()
-                org_scan_history.prefetch_related(subscan__ipaddress__geo_iso)
+                org_scan_history.prefetch_related("subscan__ipaddress__geo_iso")
                 # CountryISO.objects.filter(ipaddress__id__in=org_ip_id)
                 .annotate(count=Count("subscan__ipaddress__geo_iso__ipaddress"))
                 .order_by("-count")
