@@ -413,6 +413,10 @@ class NotificationAPi(APIView):
             return Response({"status": str(e)})
 
 
+def query_to_list(qs):
+    return [qs[i] for i in range(len(qs))]
+
+
 import pickle
 import json
 
@@ -541,7 +545,7 @@ class Dashboard(APIView):
         total_vul_ignore_info_count = (
             low_count + medium_count + high_count + critical_count
         )
-        most_common_vulnerability = (
+        most_common_vulnerability = query_to_list(
             Vulnerability.objects.filter(target_domain__pk__in=org_domain)
             .values("name", "severity")
             .annotate(count=Count("name"))
@@ -660,8 +664,8 @@ class Dashboard(APIView):
             "most_common_vulnerability": most_common_vulnerability,
             "total_vul_count": total_vul_count,
             "total_vul_ignore_info_count": total_vul_ignore_info_count,
-            "vulnerability_feed": vulnerability_feed,
-            "activity_feed": activity_feed,
+            "vulnerability_feed": query_to_list(vulnerability_feed),
+            "activity_feed": query_to_list(activity_feed),
             "targets_in_last_week": targets_in_last_week,
             "subdomains_in_last_week": subdomains_in_last_week,
             "vulns_in_last_week": vulns_in_last_week,
@@ -677,38 +681,38 @@ class Dashboard(APIView):
         }
 
         context["total_ips"] = org_ip.count()
-        context["most_used_port"] = (
+        context["most_used_port"] = query_to_list(
             Port.objects.filter(ports__pk__in=org_ip_id)
             .annotate(count=Count("ports"))
             .order_by("-count")
             .values()[:7]
         )
-        context["most_used_ip"] = (
+        context["most_used_ip"] = query_to_list(
             org_ip.annotate(count=Count("ip_addresses"))
             .order_by("-count")
             .exclude(ip_addresses__isnull=True)
             .values()[:7]
         )
-        context["most_used_tech"] = (
+        context["most_used_tech"] = query_to_list(
             Technology.objects.filter(technologies__pk__in=org_subdomain_id)
             .annotate(count=Count("technologies"))
             .order_by("-count")
             .values()[:7]
         )
 
-        context["most_common_cve"] = (
+        context["most_common_cve"] = query_to_list(
             CveId.objects.filter(cve_ids__pk__in=vulnerabilities_id)
             .annotate(nused=Count("cve_ids"))
             .order_by("-nused")
             .values("name", "nused")[:7]
         )
-        context["most_common_cwe"] = (
+        context["most_common_cwe"] = query_to_list(
             CweId.objects.filter(cwe_ids__pk__in=vulnerabilities_id)
             .annotate(nused=Count("cwe_ids"))
             .order_by("-nused")
             .values("name", "nused")[:7]
         )
-        context["most_common_tags"] = (
+        context["most_common_tags"] = query_to_list(
             VulnerabilityTags.objects.filter(vuln_tags__pk__in=vulnerabilities_id)
             .annotate(nused=Count("vuln_tags"))
             .order_by("-nused")
