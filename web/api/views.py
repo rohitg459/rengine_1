@@ -745,14 +745,14 @@ class Dashboard(APIView):
             # org_scan
             try:
                 print(
-                    CountryISO.objects.prefetch_related("ipaddress"),
+                    CountryISO.objects.prefetch_related("ipaddress__subscan"),
                     "pt",
                 )
             except Exception as e:
                 print(e, "dsjpt")
             try:
                 print(
-                    CountryISO.objects.prefetch_related("ipaddress").all(),
+                    CountryISO.objects.prefetch_related("ipaddress_set"),
                     "jt",
                 )
             except Exception as e:
