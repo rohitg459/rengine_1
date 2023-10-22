@@ -759,7 +759,9 @@ class Dashboard(APIView):
                 print(e, "dsjjt")
             try:
                 print(
-                    CountryISO.objects.prefetch_related("ipaddress_set"),
+                    CountryISO.objects.prefetch_related(
+                        "ipaddress__ip_subscan_ids_set"
+                    ).values(),
                     "lt",
                 )
             except Exception as e:
