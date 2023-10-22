@@ -498,9 +498,8 @@ class Dashboard(APIView):
             endpoint = EndPoint.objects.filter(target_domain__pk__in=org_domain)
             endpoint_count = endpoint.count()
             scan_count = org_scan_history.count()
-            subdomain_count = Subdomain.objects.filter(
-                target_domain__pk__in=org_domain
-            ).count()
+            subdomain = Subdomain.objects.filter(target_domain__pk__in=org_domain)
+            subdomain_count = subdomain.count()
             subdomain_with_ip_count = Subdomain.objects.filter(
                 target_domain__pk__in=org_domain, ip_addresses__isnull=False
             ).count()
@@ -745,7 +744,8 @@ class Dashboard(APIView):
                 # .annotate(count=Count("ipaddress"))
                 # .order_by("-count")
                 # .values()
-                CountryISO.objects.annotate(count=Count("ipaddress"))
+                CountryISO.objects.filter(ipaddress__subdomain__in=subdomain)
+                .annotate(count=Count("ipaddress"))
                 .order_by("-count")
                 .values()
             )
