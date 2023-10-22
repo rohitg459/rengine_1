@@ -425,35 +425,29 @@ class Dashboard(APIView):
         try:
             domain_ = Organization.objects.get(id=orgId).get_domains()
 
-            sd_analysis = (
-                domain_.prefetch_related("subdomain")
-                .annotate(month=TruncMonth("subdomain__discovered_date"))
-                .values("month")
-                .annotate(total=Count("subdomain"))
-                .values()
-            )
-            ip_analysis = (
-                domain_.prefetch_related("subdomain__ip_addresses")
+            p=domain_.annotate(month=TruncMonth("subdomain__discovered_date"))
+            .values("month")
+            .annotate(count=Count("subdomain"))
+            sd_analysis = [p[i] for i in range(len(p))]
+            q=                domain_
                 .annotate(month=TruncMonth("subdomain__discovered_date"))
                 .values("month")
                 .annotate(total=Count("subdomain__ip_addresses"))
-                .values()
-            )
-            vul_analysis = (
-                domain_.prefetch_related("vulnerability")
+
+            ip_analysis = [q[i] for i in range(len(q))]
+            r=                domain_
                 .annotate(month=TruncMonth("vulnerability__discovered_date"))
                 .values("month")
                 .annotate(total=Count("vulnerability"))
-                .values()
-            )
 
-            port_analysis = (
-                domain_.prefetch_related("subdomain__ip_addresses__ports")
+            vul_analysis = [r[i] for i in range(len(r))]
+
+            s=                domain_
                 .annotate(month=TruncMonth("subdomain__discovered_date"))
                 .values("month")
                 .annotate(total=Count("subdomain__ip_addresses__ports__number"))
-                .values()
-            )
+
+            port_analysis = [s[i] for i in range(len(s))]
 
             org_domain = list(domain_.values_list("id", flat=True))
 
@@ -505,18 +499,11 @@ class Dashboard(APIView):
             )
 
             vul_ports = (
-                vulnerabilities.prefetch_related("subdomain__ip_addresses__ports")
-                .values("subdomain__ip_addresses__ports__number")
-                .annotate(
-                    vuln_ports_group=Concat(
-                        "severity",
-                        "subdomain__ip_addresses__ports__number",
-                        output_field=models.CharField(),
-                    )
-                )
-                .annotate(vcount=models.Count("vuln_ports_group"))
-                .values()
+                vulnerabilities.values("severity")
+                .annotate(count=Count("severity"))
+                .values("severity", "subdomain__ip_addresses__ports__number", "count")
             )
+            vul_ports = [vul_ports[i] for i in range(len(vul_ports))]
             print(vul_ports, "sojal")
 
             latest_vulnerabilities = list(
@@ -726,14 +713,14 @@ class Dashboard(APIView):
                 .order_by("-nused")
                 .values("name", "nused")[:7]
             )
-            a = list(
-                Organization.objects.get(id=orgId)
-                .get_domains()
-                .exclude(subdomain=None)
-                .values_list("subdomain__id", flat=True)
-            )
+            # a = list(
+            # Organization.objects.get(id=orgId)
+            # .get_domains()
+            # .exclude(subdomain=None)
+            # .values_list("subdomain__id", flat=True)
+            # )
             b = list(
-                Subdomain.objects.filter(id__in=a)
+                Subdomain.objects.filter(id__in=org_subdomain_id)
                 .prefetch_related("ip_addresses")
                 .values_list("ip_addresses", flat=True)
                 .exclude(ip_addresses=None)
