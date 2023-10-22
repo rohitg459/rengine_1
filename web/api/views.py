@@ -735,6 +735,8 @@ class Dashboard(APIView):
         context["asset_countries"] = [c[i] for i in range(len(c))]
         # context["status"] = True
         print(context, "ctx")
+        for i in context:
+            print(i, "           ", context[i])
         return Response(context)
         #     except Exception as e:
         #         print(e, "sdss")
