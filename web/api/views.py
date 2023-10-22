@@ -743,8 +743,8 @@ class Dashboard(APIView):
                 # .order_by("-count")
                 # .values()
                 # org_scan
-                CountryISO.objects.
-                .prefetch_related("ipaddress__ip_subscan_ids").all()
+                CountryISO.objects.prefetch_related("ipaddress__ip_subscan_ids")
+                .all()
                 # CountryISO.objects.filter(ipaddress__id__in=org_ip_id)
                 .annotate(count=Count("ipaddress"))
                 .order_by("-count")
