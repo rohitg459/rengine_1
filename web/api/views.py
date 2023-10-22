@@ -425,28 +425,32 @@ class Dashboard(APIView):
         try:
             domain_ = Organization.objects.get(id=orgId).get_domains()
 
-            p=domain_.annotate(month=TruncMonth("subdomain__discovered_date"))
-            .values("month")
-            .annotate(count=Count("subdomain"))
+            p = (
+                domain_.annotate(month=TruncMonth("subdomain__discovered_date"))
+                .values("month")
+                .annotate(count=Count("subdomain"))
+            )
             sd_analysis = [p[i] for i in range(len(p))]
-            q=                domain_
-                .annotate(month=TruncMonth("subdomain__discovered_date"))
+
+            q = (
+                domain_.annotate(month=TruncMonth("subdomain__discovered_date"))
                 .values("month")
                 .annotate(total=Count("subdomain__ip_addresses"))
-
+            )
             ip_analysis = [q[i] for i in range(len(q))]
-            r=                domain_
-                .annotate(month=TruncMonth("vulnerability__discovered_date"))
+
+            r = (
+                domain_.annotate(month=TruncMonth("vulnerability__discovered_date"))
                 .values("month")
                 .annotate(total=Count("vulnerability"))
-
+            )
             vul_analysis = [r[i] for i in range(len(r))]
 
-            s=                domain_
-                .annotate(month=TruncMonth("subdomain__discovered_date"))
+            s = (
+                domain_.annotate(month=TruncMonth("subdomain__discovered_date"))
                 .values("month")
                 .annotate(total=Count("subdomain__ip_addresses__ports__number"))
-
+            )
             port_analysis = [s[i] for i in range(len(s))]
 
             org_domain = list(domain_.values_list("id", flat=True))
