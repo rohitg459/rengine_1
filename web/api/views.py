@@ -737,18 +737,18 @@ class Dashboard(APIView):
             #     .values("name", "nused")[:7]
             # )
             context = {"status": True}
-            context["asset_countries"] = (
+            # context["asset_countries"] = (
                 # CountryISO.objects.filter(id__in=ctr_iso_id)
                 # .annotate(count=Count("ipaddress"))
                 # .order_by("-count")
                 # .values()
                 # org_scan
-                CountryISO.objects.prefetch_related("ipaddress__ip_subscan_ids__set")
+                print(CountryISO.objects.prefetch_related("ipaddress__ip_subscan_ids__set"),"pt")
                 # CountryISO.objects.filter(ipaddress__id__in=org_ip_id)
-                .annotate(count=Count("ipaddress"))
-                .order_by("-count")
-                .values()
-            )
+                # .annotate(count=Count("ipaddress"))
+                # .order_by("-count")
+                # .values()
+            # )
             print(context, "ds")
 
             return Response(context)
