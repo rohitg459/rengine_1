@@ -503,14 +503,16 @@ class Dashboard(APIView):
 
         vulnerabilities = Vulnerability.objects.filter(target_domain__pk__in=org_domain)
 
-        vul_ports = (
+        portsVsvulnerabilities = (
             vulnerabilities.values("subdomain__ip_addresses__ports__number")
             .annotate(count=Count("severity"))
             .values("severity", "subdomain__ip_addresses__ports__number", "count")
             .order_by("subdomain__ip_addresses__ports__number")
         )
-        vul_ports = [vul_ports[i] for i in range(len(vul_ports))]
-        print(vul_ports, "sojal")
+        portsVsvulnerabilities = [
+            portsVsvulnerabilities[i] for i in range(len(portsVsvulnerabilities))
+        ]
+        print(portsVsvulnerabilities, "sojal")
 
         latest_vulnerabilities = list(
             vulnerabilities.filter(scan_history=lastest_scan)
@@ -675,7 +677,7 @@ class Dashboard(APIView):
             "scans_in_last_week": scans_in_last_week,
             "endpoints_in_last_week": endpoints_in_last_week,
             "last_7_dates": last_7_dates,
-            "vul_ports": vul_ports,
+            "portsVsvulnerabilities": portsVsvulnerabilities,
             "latest_vulnerabilities": latest_vulnerabilities,
             "sd_analysis": sd_analysis,
             "ip_analysis": ip_analysis,
