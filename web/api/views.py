@@ -453,7 +453,7 @@ class Dashboard(APIView):
 
         s = (
             domain_.annotate(month=TruncMonth("subdomain__discovered_date"))
-            .values("month")
+            .values("month", "subdomain__ip_addresses__ports__number")
             .annotate(total=Count("subdomain__ip_addresses__ports__number"))
         )
         port_analysis = [s[i] for i in range(len(s))]
