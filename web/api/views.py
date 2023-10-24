@@ -451,14 +451,6 @@ class Dashboard(APIView):
             )
             vul_analysis = [r[i] for i in range(len(r))]
 
-            ports = list(
-                set(
-                    domain_.values_list(
-                        "subdomain__ip_addresses__ports__number", flat=True
-                    )
-                )
-            )
-
             s = (
                 domain_.annotate(month=TruncMonth("subdomain__discovered_date"))
                 .values("month", "subdomain__ip_addresses__ports__number")
@@ -706,12 +698,18 @@ class Dashboard(APIView):
             }
 
             context["total_ips"] = org_ip.count()
-            context["most_used_port"] = query_to_list(
-                Port.objects.filter(number__in=ports)
-                .annotate(count=Count("ports"))
+            most_used_port = query_to_list(
+                domain_.values("subdomain__ip_addresses__ports__number")
+                .annotate(count=Count("subdomain__ip_addresses__ports__number"))
                 .order_by("-count")
-                .values()[:7]
-            )
+            )[:7]
+            context["most_used_port"] = most_used_port
+            # query_to_list(
+            #     Port.objects.filter(number__in=ports)
+            #     .annotate(count=Count("ports"))
+            #     .order_by("-count")
+            #     .values()[:7]
+            # )
             context["most_used_ip"] = query_to_list(
                 org_ip.annotate(count=Count("ip_addresses"))
                 .order_by("-count")
