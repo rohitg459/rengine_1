@@ -504,9 +504,10 @@ class Dashboard(APIView):
         vulnerabilities = Vulnerability.objects.filter(target_domain__pk__in=org_domain)
 
         vul_ports = (
-            vulnerabilities.values("severity")
+            vulnerabilities.values("subdomain__ip_addresses__ports__number")[:15]
             .annotate(count=Count("severity"))
             .values("severity", "subdomain__ip_addresses__ports__number", "count")
+            .order_by("subdomain__ip_addresses__ports__number", "count")
         )
         vul_ports = [vul_ports[i] for i in range(len(vul_ports))]
         print(vul_ports, "sojal")
