@@ -507,10 +507,12 @@ class Dashboard(APIView):
                 target_domain__pk__in=org_domain
             )
             vul_ports = list(
-                vulnerabilities.values_list(
-                    "subdomain__ip_addresses__ports__number", flat=True
+                set(
+                    vulnerabilities.values_list(
+                        "subdomain__ip_addresses__ports__number", flat=True
+                    )
                 )
-            ).distinct()
+            )
             portsVsvulnerabilities = (
                 vulnerabilities.values("subdomain__ip_addresses__ports__number")
                 .annotate(count=Count("severity"))
