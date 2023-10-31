@@ -393,6 +393,7 @@ class Organization(models.Model):
     description = models.TextField(blank=True, null=True)
     insert_date = models.DateTimeField()
     domains = models.ManyToManyField("Domain", related_name="domains")
+    limit = models.IntegerField(default=0)
     notification = models.ForeignKey(
         Notification,
         on_delete=models.CASCADE,

@@ -421,6 +421,22 @@ import pickle
 import json
 
 
+class ExtendLimit(APIView):
+    def post(self, request):
+        req = self.request
+        data = req.data
+        orgId = data["orgId"]
+        extend = data["extend"]
+        try:
+            org = Organization.objects.get(id=orgId)
+            newLimit = org.limit + extend
+            org.limit = newLimit
+            org.save()
+            return Response({"status": True, "orgId": org.id})
+        except Exception as e:
+            return Response({"status": False, "error": error})
+
+
 class Dashboard(APIView):
     def post(self, request):
         req = self.request
@@ -455,7 +471,7 @@ class Dashboard(APIView):
                 domain_.annotate(month=TruncMonth("subdomain__discovered_date"))
                 .values("month", "subdomain__ip_addresses__ports__number")
                 .annotate(total=Count("subdomain__ip_addresses__ports__number"))
-                .order_by("subdomain__ip_addresses__ports__number")
+                .order_by("subdomain__ip_addresses__ports__number", "-month", "-total")
             )
             port_analysis = [s[i] for i in range(len(s))]
 
