@@ -1163,7 +1163,7 @@ def port_scanning(
     file_name=None,
     subscan=None,
 ):
-    # Random sleep to prevent ip and port being overwritten
+    # Random sleep to prevent ip and port being overwritten true
     sleep(randint(1, 5))
     """
 	This function is responsible for running the port scan
