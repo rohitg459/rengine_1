@@ -609,9 +609,7 @@ class Dashboard(APIView):
             org_scan_id = list(org_scan_history.values_list("id", flat=True))
 
             org_ip_over_months = (
-                org_scan_history.prefetch_related("subdomain_set")
-                .all()
-                .order_by("month")
+                org_scan_history.prefetch_related("subdomain").all().order_by("month")
             )
             print(org_ip_over_months.first().subdomain_set.all(), "org_ip_over_months")
 
