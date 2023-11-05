@@ -327,7 +327,7 @@ class loginview(APIView):
         return Response(context)
 
 
-class target_summary(APIView):
+class targetSummary(APIView):
     def get(self, request):
         context = {}
         id = request.query_params.get("id")
