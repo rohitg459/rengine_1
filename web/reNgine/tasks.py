@@ -220,6 +220,7 @@ def initiate_scan(
     task.subdomain_discovery = False
     task.waf_detection = False
     task.dir_file_fuzz = False
+
     task.port_scan = True
 
     # task.fetch_url = True if engine_object.fetch_url else False
