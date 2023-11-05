@@ -612,7 +612,7 @@ class Dashboard(APIView):
                 org_scan_history.prefetch_related("subdomain").all().order_by("month")
             )
 
-            print(org_ip_over_months.first().subdomain, "org_ip_over_months")
+            # print(org_ip_over_months.first().subdomain, "org_ip_over_months")
 
             lastest_scan = org_scan_history.order_by("-start_scan_date").first()
             print(lastest_scan, "scllaa")
